@@ -8,7 +8,7 @@ const randomPasswordGenerator = () => {
     const randomNum = Math.floor(Math.random() * num.length);
     randomPassword += num.substring(randomNum, randomNum + 1);
   }
-  
+
   console.log(randomPassword);
   return randomPassword;
 };

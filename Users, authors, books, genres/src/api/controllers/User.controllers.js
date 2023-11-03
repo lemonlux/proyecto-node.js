@@ -64,7 +64,7 @@ const userRegister = async (req, res, next) => {
             text: `Hola ${userName}! Tu código de confirmación es ${confirmationCode}`, //al del usuario
           };
 
-          transporter.sendMail(mailInfo, function (error, info) {
+          transporter.sendMail(mailInfo, function (error) {
             //esta es la estructura segun la libreria
             if (error) {
               //el user está guardado pero el código no se ha enviado
@@ -227,7 +227,7 @@ const redirectRegister = async (req, res, next) => {
           //*esta ruta tiene que ser la misma que especifiquemos en user routes para la funcion send mail
         }
       } catch (error) {
-        rreq.file && deleteImgCloudinary(catchImg);
+        req.file && deleteImgCloudinary(catchImg);
         return (
           res.status(404).json({
             error: 'error en el catch del save',
@@ -310,7 +310,7 @@ const sendCode = async (req, res, next) => {
 //! --------------------------------- LOGIN ----------------------------------------
 //?---------------------------------------------------------------------------------
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   //no hay imagen que cachear ni que sincronizar indexes (no estamos metiendo info nueva)
   try {
     //ya tenemos usuario registrado tenemos que ver si existe
@@ -353,7 +353,7 @@ const login = async (req, res, next) => {
 //* -- lo metemos por JSON y el token que nos devuelve lo tenemos que copiar y pegar encima del token anterior
 //* guardado en las variables de entorno
 
-const autoLogin = async (req, res, next) => {
+const autoLogin = async (req, res) => {
   try {
     const { userEmail, password } = req.body;
     const userDB = await User.findOne({ userEmail });
@@ -386,7 +386,7 @@ const autoLogin = async (req, res, next) => {
 //! ----------------------------- RESEND CODE --------------------------------------
 //?---------------------------------------------------------------------------------
 
-const resendCode = async (req, res, next) => {
+const resendCode = async (req, res) => {
   try {
     const { userEmail } = req.body;
     const userExists = await User.findOne({ userEmail });
@@ -530,7 +530,7 @@ necesitamos el email del usuario, redirigirlo
 funciones de crear transporte, mailInfo y enviarlo.
 y una funcion de creación de contraseñas random--- randomPasswordGenerator en utils */
 
-const changePassword = async (req, res, next) => {
+const changePassword = async (req, res) => {
   try {
     const { userEmail } = req.body;
     const userExists = await User.findOne({ userEmail });
@@ -649,7 +649,7 @@ const sendNewPassword = async (req, res, next) => {
 antigua y la actual, comparar la antigua a la guardada y validar que la nueva sea segura. entonces findByIdAndUpdate.
 también vamos a hacer un test para comprobar que se ha modificado correctamente */
 
-const modifyPassword = async (req, res, next) => {
+const modifyPassword = async (req, res) => {
   console.log('hola');
   try {
     const { password, newPassword } = req.body;
@@ -711,7 +711,7 @@ const modifyPassword = async (req, res, next) => {
 //! --------------------------------- UPDATE ---------------------------------------
 //?---------------------------------------------------------------------------------
 
-const updateUser = async (req, res, next) => {
+const updateUser = async (req, res) => {
   //si hay subida imagen siempre se captura por si hay un error borrarla --> upload en la ruta
   let catchImg = req.file?.path;
 
@@ -754,61 +754,58 @@ const updateUser = async (req, res, next) => {
       }
     }
 
-      //--- ahora a ACTUALIZAR ----- trycatch
+    //--- ahora a ACTUALIZAR ----- trycatch
 
-      try {
-        await User.findByIdAndUpdate(req.user._id, updating);
-        console.log(await User.findById(req.user._id))
-        if (req.file) deleteImgCloudinary(req.user.image);
+    try {
+      await User.findByIdAndUpdate(req.user._id, updating);
+      console.log(await User.findById(req.user._id));
+      if (req.file) deleteImgCloudinary(req.user.image);
 
-        //todo-------- TESTING
+      //todo-------- TESTING
 
-        //hacemos la constante del usuario actualizado
+      //hacemos la constante del usuario actualizado
 
-        const updatedUser = await User.findById(req.user._id);
-        //necesitamos tambien LAS KEYS del objeto del req.body para ver qué se ha actualizado
-        const updatedKeys = Object.keys(req.body);
+      const updatedUser = await User.findById(req.user._id);
+      //necesitamos tambien LAS KEYS del objeto del req.body para ver qué se ha actualizado
+      const updatedKeys = Object.keys(req.body);
 
-        const test = []; //vamos a meter los testing aqui
+      const test = []; //vamos a meter los testing aqui
 
-        /*recorremos el string que nos devuelve el Object.keys comparando las que nos llegan del body
+      /*recorremos el string que nos devuelve el Object.keys comparando las que nos llegan del body
         con las que tenemos guardadas en el update, y las de antes (del user antes de ser actualizado)*/
 
-        updatedKeys.forEach((key) => {
-          if (updatedUser[key] === req.body[key]){
-
-            if (updatedUser[key] != req.user[key]){
-              test.push({ [key]: true })    //si coincide el body con la actualizada y es diferente a la de antes, true
-            }else{
-              test.push({ [key]: 'same old info' }) //si no es diferente a la de antes, es la misma info
-            }
-          }else{
-             test.push({ [key]: false }); //si no coinciden, no se ha guardado bien
+      updatedKeys.forEach((key) => {
+        if (updatedUser[key] === req.body[key]) {
+          if (updatedUser[key] != req.user[key]) {
+            test.push({ [key]: true }); //si coincide el body con la actualizada y es diferente a la de antes, true
+          } else {
+            test.push({ [key]: 'same old info' }); //si no es diferente a la de antes, es la misma info
           }
+        } else {
+          test.push({ [key]: false }); //si no coinciden, no se ha guardado bien
+        }
 
+        //!!   tambien tenemos que asegurarnos de la foto
 
-            //!!   tambien tenemos que asegurarnos de la foto
+        if (req.file) {
+          updatedUser.image === catchImg
+            ? test.push({ [key]: true })
+            : test.push({ [key]: false });
+        }
 
-          if (req.file){
-            updatedUser.image === catchImg ? test.push({ [key]: true }) : test.push({ [key]: false }) 
-          }
+        //una vez hecho el testing enviamos la res con el usuario actualizado y el test
+      });
 
-          //una vez hecho el testing enviamos la res con el usuario actualizado y el test
-
-            
-        });
-
-        return res.status(200).json({
-          updatedUser,
-          test
-        })
-      } catch (error) {
-        return res.status(404).json({
-          error: 'error en el catch del update',
-          message: error.message,
-        });
-      }
-    
+      return res.status(200).json({
+        updatedUser,
+        test,
+      });
+    } catch (error) {
+      return res.status(404).json({
+        error: 'error en el catch del update',
+        message: error.message,
+      });
+    }
   } catch (error) {
     return res.status(404).json({
       error: 'error en el catch',
@@ -821,7 +818,7 @@ const updateUser = async (req, res, next) => {
 //! --------------------------------- DELETE ---------------------------------------
 //?---------------------------------------------------------------------------------
 
-const deleteUser = async (req, res, next) => {
+const deleteUser = async (req, res) => {
   //aquí NO hay que hacer destructuring porque la info la vamos a sacar del req.user
   try {
     await User.findByIdAndDelete(req.user?._id);
@@ -843,7 +840,7 @@ const deleteUser = async (req, res, next) => {
 
 //* ________________________________ READ _________________________________________
 
-const userById = async (req, res, next) => {
+const userById = async (req, res) => {
   try {
     const { id } = req.params;
     const userById = await User.findById(id);
@@ -860,7 +857,7 @@ const userById = async (req, res, next) => {
   }
 };
 
-const userByEmail = async (req, res, next) => {
+const userByEmail = async (req, res) => {
   try {
     const { userEmail } = req.body;
     const userByEmail = await User.findOne({ userEmail });
@@ -899,5 +896,5 @@ module.exports = {
   modifyPassword,
   userByEmail,
   deleteUser,
-  updateUser
+  updateUser,
 };

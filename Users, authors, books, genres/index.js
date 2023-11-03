@@ -35,6 +35,13 @@ app.use(express.urlencoded({ limit: '5mb', extended: false }));
 
 const UserRoutes = require('./src/api/routes/User.routes');
 app.use('/api/v1/users/', UserRoutes);
+
+const AuthorRoutes = require('./src/api/routes/Author.routes');
+app.use('/api/v1/authors/', AuthorRoutes);
+
+const BookRoutes = require('./src/api/routes/Book.routes');
+app.use('/api/v1/books/', BookRoutes);
+
 //!---6---- ERRORES DE RUTA Y CRASH
 
 app.use('*', (req, res, next) => {

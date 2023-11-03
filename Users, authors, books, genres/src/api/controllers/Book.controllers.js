@@ -1,5 +1,5 @@
-const Author = require("./../models/Author.model");
-const Book = require("../models/Book.model");
+const Author = require('./../models/Author.model');
+const Book = require('../models/Book.model');
 
 //!---------- POST ----------
 
@@ -12,11 +12,11 @@ const createBook = async (req, res, next) => {
 
     return res
       .status(savedBook ? 200 : 404)
-      .json(savedBook ? savedBook : "error al postear");
+      .json(savedBook ? savedBook : 'error al postear');
   } catch (error) {
     return (
       res.status(404).json({
-        error: "error en el catch del post",
+        error: 'error en el catch del post',
         message: error.message,
       }) && next(error)
     ); //para mandarlo al siguiente
@@ -27,18 +27,18 @@ const createBook = async (req, res, next) => {
 
 //* ---------------------- get by id ---------------------------
 
-const getBookById = async (req, res, next) => {
+const getBookById = async (req, res) => {
   try {
     const { id } = req.params;
     const bookById = await Book.findById(id);
     if (bookById) {
       return res.status(200).json(bookById);
     } else {
-      return res.status(404).json("no se ha encontrado este libro por id");
+      return res.status(404).json('no se ha encontrado este libro por id');
     }
   } catch (error) {
     return res.status(404).json({
-      error: "error en el catch de get by id",
+      error: 'error en el catch de get by id',
       message: error.message,
     });
   }
@@ -46,17 +46,17 @@ const getBookById = async (req, res, next) => {
 
 //* ---------------------- get all ---------------------------
 
-const getAllBooks = async (req, res, next) => {
+const getAllBooks = async (req, res) => {
   try {
     const allBooks = await Book.find();
     if (allBooks.length > 0) {
       return res.status(200).json(allBooks);
     } else {
-      return res.status(404).json("no se han encontrado libros");
+      return res.status(404).json('no se han encontrado libros');
     }
   } catch (error) {
     return res.status(404).json({
-      error: "error en el catch del get all",
+      error: 'error en el catch del get all',
       message: error.message,
     });
   }
@@ -64,18 +64,18 @@ const getAllBooks = async (req, res, next) => {
 
 //* ---------------------- get by name ---------------------------
 
-const getBookByName = async (req, res, next) => {
+const getBookByName = async (req, res) => {
   try {
     const { name } = req.params;
     const bookByName = await Book.find({ name }); //el metodo find es con OBJETO
     if (bookByName) {
       return res.status(200).json(bookByName);
     } else {
-      return res.status(404).json("no se ha encontrado el libro");
+      return res.status(404).json('no se ha encontrado el libro');
     }
   } catch (error) {
     return res.status(200).json({
-      error: "error en el catch de la busqueda por nombre",
+      error: 'error en el catch de la busqueda por nombre',
       message: error.message,
     });
   }
@@ -92,11 +92,11 @@ const toggleAuthors = async (req, res, next) => {
   const { authors } = req.body; //esto crea un string separado por comas de los autores
   const bookById = await Book.findById(id);
   if (bookById) {
-    const arrayIdBooks = authors.split(",");
+    const arrayIdBooks = authors.split(',');
     //recorremos el array creado con un mapeo y dentro de una promesa para manejar asincronías
     console.log(bookById);
     Promise.all(
-      arrayIdBooks.map(async (author, index) => {
+      arrayIdBooks.map(async (author) => {
         if (bookById.authors.includes(author)) {
           try {
             await Book.findByIdAndUpdate(id, {
@@ -108,13 +108,13 @@ const toggleAuthors = async (req, res, next) => {
               });
             } catch (error) {
               res.status(404).json({
-                error: "error al actualizar el escritor",
+                error: 'error al actualizar el escritor',
                 message: error.message,
               }) && next(error);
             }
           } catch (error) {
             res.status(404).json({
-              error: "error al actualizar el libro",
+              error: 'error al actualizar el libro',
               message: error.message,
             }) && next(error);
           }
@@ -129,13 +129,13 @@ const toggleAuthors = async (req, res, next) => {
               });
             } catch (error) {
               res.status(404).json({
-                error: "error al actualizar el escritor",
+                error: 'error al actualizar el escritor',
                 message: error.message,
               }) && next(error);
             }
           } catch (error) {
             res.status(404).json({
-              error: "error al actualizar el libro",
+              error: 'error al actualizar el libro',
               message: error.message,
             }) && next(error);
           }
@@ -147,13 +147,13 @@ const toggleAuthors = async (req, res, next) => {
       });
     });
   } else {
-    return res.status(404).json("este libro no existe");
+    return res.status(404).json('este libro no existe');
   }
 };
 
 //* ---------------------- update PARA NAME, YEAR Y GENRE ---------------------------
 
-const updateBooks = async (req, res, next) => {
+const updateBooks = async (req, res) => {
   await Book.syncIndexes(); //syncIndexes en update y post
   try {
     const { id } = req.params;
@@ -167,49 +167,48 @@ const updateBooks = async (req, res, next) => {
       };
       try {
         await Book.findByIdAndUpdate(id, customBookBody);
-        const newBookUpdate = await Book.findById(id)
-        
+        const newBookUpdate = await Book.findById(id);
+
         //todo -------TESTING---------
         const bookUpdate = Object.keys(req.body);
         console.log(bookUpdate);
 
         let test = {};
-        let acc = 0
+        let acc = 0;
 
         bookUpdate.forEach((item) => {
-            console.log(req.body[item])
-            console.log(newBookUpdate[item])
+          console.log(req.body[item]);
+          console.log(newBookUpdate[item]);
           req.body[item] === newBookUpdate[item]
             ? (test[item] = true)
             : (test[item] = false);
         });
 
-        for (key in test){
-            test[key] == false && acc ++
+        for (let key in test) {
+          test[key] == false && acc++;
         }
 
-        if(acc>0){
-            return res.status(404).json({
-                dataTest: test,
-                update: false
-            })
-        }else{
-            return res.status(200).json({
-                dataTest: test,
-                update: true
-            })
+        if (acc > 0) {
+          return res.status(404).json({
+            dataTest: test,
+            update: false,
+          });
+        } else {
+          return res.status(200).json({
+            dataTest: test,
+            update: true,
+          });
         }
-
       } catch (error) {
         return res.status(404).json({
-          error: "error en el catch actualizando el book",
+          error: 'error en el catch actualizando el book',
           message: error.message,
         });
       }
     }
   } catch (error) {
     return res.status(404).json({
-      error: "error en el catch del update",
+      error: 'error en el catch del update',
       message: error.message,
     });
   }
@@ -217,43 +216,39 @@ const updateBooks = async (req, res, next) => {
 
 //!----- DELETE----
 
-const deleteBooks = async (req,res,next)=>{
-try {
-    const { id } = req.params
-    const bookToDelete = await Book.findByIdAndDelete(id)
-  // se ha elimiando??
-  if (bookToDelete){
-    //lo buscamos una vez borrado a ver si se ha elimnado
-    const bookById = await Book.findById(id)
-    try {
-      const test = await Author.updateMany(
-        { books: id},
-        { $pull: {books: id} }
-      )
+const deleteBooks = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const bookToDelete = await Book.findByIdAndDelete(id);
+    // se ha elimiando??
+    if (bookToDelete) {
+      //lo buscamos una vez borrado a ver si se ha elimnado
+      const bookById = await Book.findById(id);
+      try {
+        const test = await Author.updateMany(
+          { books: id },
+          { $pull: { books: id } }
+        );
 
-    return res.status(bookById? 404 : 200).json({deleteTest: bookById? false : true})
-
-    } catch (error) {
-      return res.status(404).json({
-        error: "no se ha podido borrar",
-        message: error.message
-    })
+        return res
+          .status(bookById ? 404 : 200)
+          .json({ deleteTest: bookById ? false : true });
+      } catch (error) {
+        return res.status(404).json({
+          error: 'no se ha podido borrar',
+          message: error.message,
+        });
+      }
+    } else {
+      return res.status(404).json('no se ha encontrado este libro');
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: 'error en el catch del delete',
+      message: error.message,
+    });
   }
-  }else{
-    return res.status(404).json("no se ha encontrado este libro")
-  }
-
-} catch (error) {
-  return res.status(404).json({
-    error: "error en el catch del delete",
-    message: error.message
-  })
-}
-
-}
-
-
-
+};
 
 module.exports = {
   createBook,
