@@ -10,9 +10,8 @@ const BookSchema = new Schema(
     name: {
       type: String,
       required: true,
-      unique: false,
     },
-    year: {
+    published: {
       type: Number,
       required: false,
     },
@@ -20,10 +19,19 @@ const BookSchema = new Schema(
       type: String,
       required: false,
     },
+    pages: {
+      type: Number
+    },
     authors: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Author',
+      },
+    ],
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
       },
     ],
   },
