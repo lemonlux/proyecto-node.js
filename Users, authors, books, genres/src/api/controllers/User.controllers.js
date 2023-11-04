@@ -1,5 +1,8 @@
 //?------------------------ modelos ------------------------------
 const User = require('../models/User.models');
+const Book = require('../models/Book.model')
+const Author = require('../models/Author.model')
+const Genre = require('../models/Genre.model')
 
 //?------------------------- utils --------------------------------
 const randomCode = require('../../utils/randomCode');
@@ -23,6 +26,7 @@ const { setSendEmail, getSendEmail } = require('../../state/state.data');
 
 //?------------------------- helpers ------------------------------
 
+const setError = require('../../helpers/handleError')
 
 
 
@@ -404,10 +408,9 @@ const login = async (req, res) => {
       return res.status(404).json('This user is not registered');
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch del login',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general to sendResendCode')
+    );
   }
 };
 
@@ -440,10 +443,9 @@ const autoLogin = async (req, res) => {
       return res.status(404).json('This user does not exist');
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch del autologin',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general to sendResendCode')
+    );
   }
 };
 
@@ -495,10 +497,9 @@ const resendCode = async (req, res) => {
       return res.status(404).json('This user does not exist');
     }
   } catch (error) {
-    return res.status(404).sjon({
-      error: 'error en el catch general',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general to sendResendCode')
+    );
   }
 };
 
@@ -576,7 +577,7 @@ const verifyCode = async (req, res, next) => {
     }
   } catch (error) {
     return (
-      res.status(200).json({
+      res.status(404).json({
         error: 'error en el catch',
         message: error.message,
       }) && next(error)
@@ -609,10 +610,9 @@ const changePassword = async (req, res) => {
       return res.status(404).json('This user does not exist');
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general to sendResendCode')
+    );
   }
 };
 
@@ -765,10 +765,9 @@ const modifyPassword = async (req, res) => {
       return res.status(404).json('Password is not strong enough');
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general modifyPassword')
+    );
   }
 };
 
@@ -872,35 +871,138 @@ const updateUser = async (req, res) => {
       });
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general updateUser')
+    );
   }
 };
 
 //?---------------------------------------------------------------------------------
 //! ----------------------------- FAVOYRITE BOOK -----------------------------------
 //?---------------------------------------------------------------------------------
+//vamos a sacar el book por los params y la info del usuario (fav Books, id) por el token-- req.user
+
+
+const addFavouriteBook = async (req,res,next) =>{
+  try {
+    const { _id, favBooks } = req.user
+    const { idBook } = req.params
+
+    //si en el usuario no se encuentra esa movie la metemos, si sí se encuentra la sacamos --- TOGGLE
+
+    if(favBooks.includes(idBook)){
+// TENEMOS QUE SACAR EL LIBRO DE LOS LIKES EL USUARIO, Y EL USUARIO DEL REGISTRO DE LIKES DEL LIBRO 
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { favBooks: idBook }
+        })
+    
+        try {
+          await Book.findByIdAndUpdate(idBook, {
+            $pull: { likes: _id }
+          })
+
+          //!------- respuesta ------------- dentro de este try si todo ha salido bien
+
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            bookUpdated: await Book.findById(idBook),
+            update: `pulled ${idBook} from User's likes`
+          })
+
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch pull user',
+            message: error.message,
+        })
+        }
+
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch pull book',
+          message: error.message,
+      })
+    }
+
+
+    }else{
+      //lo sacamos
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { favBooks: idBook }
+        })
+    
+        try {
+          await Book.findByIdAndUpdate(idBook, {
+            $push: { likes: _id }
+          })
+
+          //!------- respuesta ------------- dentro de este try si todo ha salido bien
+
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            bookUpdated: await Book.findById(idBook),
+            update: `pushed ${idBook} to User's likes`
+          })
+
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch push user',
+            message: error.message,
+        })
+        }
+
+
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch push book',
+          message: error.message,
+      })
+    }
+
+    }
+
+
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error general addFavouriteBook')
+    );
+}
+
+
+}
+
+
+
+
 
 
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOURITE AUTHOR -----------------------------------
+//! ----------------------------- FAVOURITE AUTHOR ---------------------------------
 //?---------------------------------------------------------------------------------
 
 
+
+
+
+
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOURITE GENRE -----------------------------------
+//! ----------------------------- FAVOURITE GENRE ----------------------------------
 //?---------------------------------------------------------------------------------
 
 
-//* ________________________________ DELETE _________________________________________
 
+
+
+
+
+//* ________________________________ delete _________________________________________
 
 //?---------------------------------------------------------------------------------
 //! --------------------------------- DELETE ---------------------------------------
 //?---------------------------------------------------------------------------------
 
+//! cambiar
 const deleteUser = async (req, res) => {
   //aquí NO hay que hacer destructuring porque la info la vamos a sacar del req.user
   try {
@@ -939,4 +1041,5 @@ module.exports = {
   userByEmail,
   deleteUser,
   updateUser,
+  addFavouriteBook,
 };

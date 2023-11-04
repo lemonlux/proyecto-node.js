@@ -24,7 +24,7 @@ hay que remplazar esta palabra Bearer por un espacio vacío para que JSON WEB TO
     return next(new Error('Unauthorized'));
   }
 
-  try {
+  try { //si no hay token -- unauthorized. si sí hay --- se verifica
     // podriamos hacer jwt.verify(token, jwt_secret)
 
     const decoded = verifyToken(token, process.env.JWT_SECRET);
