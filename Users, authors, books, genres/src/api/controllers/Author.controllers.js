@@ -1,5 +1,21 @@
 //!--22----- IMPORTAMOS LA FUNCION deleteImgCloudinary Y LA FUNCION CORRESPONDIENTE DE LOS MODALES
 
+//?------------------------ modelos ------------------------------
+
+
+//?------------------------- utils -------------------------------
+
+//?----------------------- middleware -----------------------------
+
+
+//?------------------------ librería ------------------------------
+
+
+//?------------------------- estados ------------------------------
+
+//?------------------------- helpers ------------------------------
+
+
 const { deleteImgCloudinary } = require('../../middleware/files.middleware');
 const Author = require('../models/Author.model');
 const Book = require('../models/Book.model');

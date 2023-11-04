@@ -1,15 +1,75 @@
+//?------------------------ modelos ------------------------------
 const User = require('../models/User.models');
+
+//?------------------------- utils --------------------------------
 const randomCode = require('../../utils/randomCode');
 // randomCode(100000, 999999)
-const { deleteImgCloudinary } = require('../../middleware/files.middleware');
-const nodemailer = require('nodemailer');
-const { setSendEmail, getSendEmail } = require('../../state/state.data');
 const sendEmail = require('../../utils/sendEmail');
 const { generateToken } = require('../../utils/token');
-const bcrypt = require('bcrypt');
 const randomPasswordGenerator = require('../../utils/randomPassword');
-const validator = require('validator');
 const validEnum = require('../../utils/validEnum');
+
+//?----------------------- middleware -----------------------------
+const { deleteImgCloudinary } = require('../../middleware/files.middleware');
+
+//?------------------------ librería ------------------------------
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
+const validator = require('validator');
+
+//?------------------------- estados ------------------------------
+const { setSendEmail, getSendEmail } = require('../../state/state.data');
+
+
+//?------------------------- helpers ------------------------------
+
+
+
+
+//* ________________________________ READ _________________________________________
+
+const userById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userById = await User.findById(id);
+    if (userById) {
+      return res.status(200).json(userById);
+    } else {
+      return res.status(404).json('Usuario no encontrado');
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: 'error en el catch',
+      message: error.message,
+    });
+  }
+};
+
+const userByEmail = async (req, res) => {
+  try {
+    const { userEmail } = req.body;
+    const userByEmail = await User.findOne({ userEmail });
+
+    if (userByEmail) {
+      return res.status(200).json({
+        userByEmail,
+        message: 'user found',
+      });
+    } else {
+      return res.status(404).json({
+        userEmail,
+        message: 'user not found',
+      });
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: 'error en el catch',
+      message: error.message,
+    });
+  }
+};
+
+
 
 //* ________________________________ POST _________________________________________
 
@@ -814,6 +874,10 @@ const updateUser = async (req, res) => {
   }
 };
 
+
+//* ________________________________ DELETE _________________________________________
+
+
 //?---------------------------------------------------------------------------------
 //! --------------------------------- DELETE ---------------------------------------
 //?---------------------------------------------------------------------------------
@@ -838,48 +902,7 @@ const deleteUser = async (req, res) => {
   }
 };
 
-//* ________________________________ READ _________________________________________
 
-const userById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userById = await User.findById(id);
-    if (userById) {
-      return res.status(200).json(userById);
-    } else {
-      return res.status(404).json('Usuario no encontrado');
-    }
-  } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch',
-      message: error.message,
-    });
-  }
-};
-
-const userByEmail = async (req, res) => {
-  try {
-    const { userEmail } = req.body;
-    const userByEmail = await User.findOne({ userEmail });
-
-    if (userByEmail) {
-      return res.status(200).json({
-        userByEmail,
-        message: 'user found',
-      });
-    } else {
-      return res.status(404).json({
-        userEmail,
-        message: 'user not found',
-      });
-    }
-  } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch',
-      message: error.message,
-    });
-  }
-};
 
 module.exports = {
   userRegister,
