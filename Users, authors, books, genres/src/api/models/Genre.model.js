@@ -22,6 +22,18 @@ const GenreSchema = new Schema(
         'Cómic'
       ],
     },
+    books: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'Book',
+        },
+      ],
+      likes: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+    ],
   },
   {
     timestamps: true,
