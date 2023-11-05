@@ -5,7 +5,7 @@ const Author = require('../models/Author.model');
 const Book = require('../models/Book.model');
 
 //?------------------------- utils -------------------------------
-const validEnum = require('../../utils/validEnum')
+const { validEnumGender, validEnumLanguage } = require('../../utils/validEnum')
 
 //?----------------------- middleware -----------------------------
 const { deleteImgCloudinary } = require('../../middleware/files.middleware');
@@ -153,11 +153,17 @@ const update = async (req, res) => {
         _id: authorById._id,
         image: req.file?.path ? catchImg : oldImg,
         name: req.body?.name ? req.body?.name : authorById.name,
+        yearBorn: req.body?.yearBorn ? req.body?.yearBorn : authorById.yearBorn
       };
 
       if (req.body?.gender){
-        const genderValid = validEnum(req.body?.gender)
+        const genderValid = validEnumGender(req.body?.gender)
         customBody.gender = genderValid ? req.body?.gender : authorById.gender
+      }
+
+      if(req.body?.language){
+        const languageValid = validEnumLanguage(req.body?.language)
+        customBody.language = languageValid ? req.body?.language : authorById.language
       }
 
       try {
@@ -198,14 +204,12 @@ const update = async (req, res) => {
         if (acc > 0) {
           return res.status(404).json({
             authorByIdUpdate,
-            dataTest: test,
-            update: false,
+            update: test,
           });
         } else {
           return res.status(200).json({
             authorByIdUpdate,
-            dataTest: test,
-            update: true,
+            update: test,
           });
         }
       } catch (error) {
@@ -227,6 +231,84 @@ const update = async (req, res) => {
 //! ---------------------------- TOGGLE BOOKS --------------------------------------
 //?-------------------------------- update -----------------------------------------
 
+
+
+const toggleBooks = async (req, res, next) => {
+ 
+  const { id } = req.params;   // id del autor
+  const { books } = req.body; //esto crea un string separado por comas de los books
+  const authorById = await Author.findById(id);
+  if (authorById) {
+    const arrayIdBooks = books.split(',');
+    //recorremos el array creado con un mapeo y dentro de una promesa para manejar asincronías
+    Promise.all(
+      arrayIdBooks.map(async (book) => {
+        if (authorById.books.includes(book)) {
+          try {
+            await Author.findByIdAndUpdate(id, {
+              $pull: { books: book },
+            });
+            try {
+              await Book.findByIdAndUpdate(book, {
+                $pull: { authors: id },
+              });
+            } catch (error) {
+              res.status(404).json({
+                error: 'error al actualizar el libro',
+                message: error.message,
+              }) && next(error);
+            }
+          } catch (error) {
+            res.status(404).json({
+              error: 'error al actualizar el autor',
+              message: error.message,
+            }) && next(error);
+          }
+        } else {
+          try {
+            await Author.findByIdAndUpdate(id, {
+              $push: { books: book },
+            });
+            try {
+              await Book.findByIdAndUpdate(book, {
+                $push: { authors: id },
+              });
+            } catch (error) {
+              res.status(404).json({
+                error: 'error al actualizar el libro',
+                message: error.message,
+              }) && next(error);
+            }
+          } catch (error) {
+            res.status(404).json({
+              error: 'error al actualizar el autor',
+              message: error.message,
+            }) && next(error);
+          }
+        }
+      })
+    ).then(async () => {
+      return res.status(200).json({
+        dataUpdate: await Author.findById(id),
+      });
+    });
+  } else {
+    return res.status(404).json({
+      error: 'este autor no existe',
+      message: error.message
+    });
+  }
+};
+
+
+
+
+
+
+
+
+
+
 //?---------------------------------------------------------------------------------
 //! ---------------------------- TOGGLE GENRES -------------------------------------
 //?-------------------------------- update -----------------------------------------
@@ -246,6 +328,8 @@ const deleteAuthor = async (req, res) => {
   try {
     const { id } = req.params;
     const author = await Author.findByIdAndDelete(id);
+    deleteImgCloudinary(req.file?.path)
+
     if (author) {
       //lo ha borrado, pero ahora vamos a hacer el TESTING--- EXISTE?
       const findByIdAuthor = await Author.findById(id);
@@ -285,4 +369,5 @@ module.exports = {
   getByName,
   deleteAuthor,
   update,
+  toggleBooks,
 };

@@ -10,7 +10,7 @@ const randomCode = require('../../utils/randomCode');
 const sendEmail = require('../../utils/sendEmail');
 const { generateToken } = require('../../utils/token');
 const randomPasswordGenerator = require('../../utils/randomPassword');
-const validEnum = require('../../utils/validEnum');
+const { validEnumGender } = require('../../utils/validEnum');
 
 //?----------------------- middleware -----------------------------
 const { deleteImgCloudinary } = require('../../middleware/files.middleware');
@@ -801,7 +801,7 @@ const updateUser = async (req, res) => {
       esto tb se puede asegurar por el front end pero lo mejor es hacerlo por los dos lados */
 
       //necesitamos una funcion que solo nos permita meter un genero de los de la enum -- en utils
-      const genderOk = validEnum(req.body?.gender);
+      const genderOk = validEnumGender(req.body?.gender);
       if (genderOk) {
         updating.gender = req.body?.gender;
       } else {

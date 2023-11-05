@@ -115,22 +115,23 @@ const getBookByName = async (req, res) => {
 
 const toggleAuthors = async (req, res, next) => {
   //lo vamos a localizar con un id
-  const { id } = req.params;
+  const { id } = req.params;   // BOOK
   const { authors } = req.body; //esto crea un string separado por comas de los autores
   const bookById = await Book.findById(id);
   if (bookById) {
-    const arrayIdBooks = authors.split(',');
+    const arrayIdAuthors = authors.split(',');
     //recorremos el array creado con un mapeo y dentro de una promesa para manejar asincronías
-    console.log(bookById);
+    // console.log(bookById);
     Promise.all(
-      arrayIdBooks.map(async (author) => {
+      arrayIdAuthors.map(async (author) => {
+        console.log(author)
         if (bookById.authors.includes(author)) {
           try {
             await Book.findByIdAndUpdate(id, {
               $pull: { authors: author },
             });
             try {
-              await Author.findByIdAndUpdate(id, {
+              await Author.findByIdAndUpdate(author, {
                 $pull: { books: id },
               });
             } catch (error) {
@@ -151,7 +152,7 @@ const toggleAuthors = async (req, res, next) => {
               $push: { authors: author },
             });
             try {
-              await Author.findByIdAndUpdate(id, {
+              await Author.findByIdAndUpdate(author, {
                 $push: { books: id },
               });
             } catch (error) {
@@ -169,7 +170,7 @@ const toggleAuthors = async (req, res, next) => {
         }
       })
     ).then(async () => {
-      return res.status(404).json({
+      return res.status(200).json({
         dataUpdate: await Book.findById(id),
       });
     });

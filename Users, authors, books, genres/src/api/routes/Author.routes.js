@@ -7,7 +7,9 @@ const {
   getByName,
   deleteAuthor,
   update,
+  toggleBooks,
 } = require('../controllers/Author.controllers');
+const Author = require('../models/Author.model');
 
 // en medio de la ruta y de la funcion que es el controlador que se llama create
 //  esta el middleware de subida de ficheros a cloudinary----> upload
@@ -26,6 +28,7 @@ AuthorRoutes.get('/', getAll);
 AuthorRoutes.get('/byName/:name', getByName);
 AuthorRoutes.patch('/:id', upload.single('image'), update);
 AuthorRoutes.delete('/:id', deleteAuthor);
+AuthorRoutes.patch('/add/:id', toggleBooks)
 
 //!--28---- EXPORTAMOS LA FUNCION y la llevamos al index, debajo de las limitaciones del json
 
