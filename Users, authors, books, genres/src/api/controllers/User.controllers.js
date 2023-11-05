@@ -952,9 +952,22 @@ const addFavouriteBook = async (req, res, next) => {
 //! ----------------------------- FAVOURITE AUTHOR ---------------------------------
 //?---------------------------------------------------------------------------------
 
+
+
+
+
+
 //?---------------------------------------------------------------------------------
 //! ----------------------------- FAVOURITE GENRE ----------------------------------
 //?---------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
 //* ________________________________ delete _________________________________________
 
@@ -962,7 +975,6 @@ const addFavouriteBook = async (req, res, next) => {
 //! --------------------------------- DELETE ---------------------------------------
 //?---------------------------------------------------------------------------------
 
-//! cambiar
 const deleteUser = async (req, res) => {
   //aquí NO hay que hacer destructuring porque la info la vamos a sacar del req.user
   try {
@@ -1012,10 +1024,7 @@ const deleteUser = async (req, res) => {
       });
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch',
-      message: error.message,
-    });
+    return next(setError(500, error.message || 'Error general to DELETE'));
   }
 };
 

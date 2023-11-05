@@ -5,6 +5,7 @@ const Author = require('../models/Author.model');
 const Book = require('../models/Book.model');
 
 //?------------------------- utils -------------------------------
+const validEnum = require('../../utils/validEnum')
 
 //?----------------------- middleware -----------------------------
 const { deleteImgCloudinary } = require('../../middleware/files.middleware');
@@ -151,9 +152,13 @@ const update = async (req, res) => {
       const customBody = {
         _id: authorById._id,
         image: req.file?.path ? catchImg : oldImg,
-        gender: req.body?.gender ? req.body?.gender : authorById.gender,
         name: req.body?.name ? req.body?.name : authorById.name,
       };
+
+      if (req.body?.gender){
+        const genderValid = validEnum(req.body?.gender)
+        customBody.gender = genderValid ? req.body?.gender : authorById.gender
+      }
 
       try {
         await Author.findByIdAndUpdate(id, customBody);
@@ -169,7 +174,11 @@ const update = async (req, res) => {
         //si el elemento existe
         elementUpdate.forEach((item) => {
           if (req.body[item] === authorByIdUpdate[item]) {
+            if (req.body[item] != authorById[item]){   //si no es la misma que la antigua
             test[item] = true;
+            }else{
+              test[item] = 'same old info'
+            }
           } else {
             test[item] = false;
           }
@@ -188,11 +197,13 @@ const update = async (req, res) => {
         }
         if (acc > 0) {
           return res.status(404).json({
+            authorByIdUpdate,
             dataTest: test,
             update: false,
           });
         } else {
           return res.status(200).json({
+            authorByIdUpdate,
             dataTest: test,
             update: true,
           });
