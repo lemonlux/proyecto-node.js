@@ -1,8 +1,10 @@
 //!--22----- IMPORTAMOS LA FUNCION deleteImgCloudinary Y LA FUNCION CORRESPONDIENTE DE LOS MODALES
 
 //?------------------------ modelos ------------------------------
-const Author = require('../models/Author.model');
+const User = require('../models/User.models');
 const Book = require('../models/Book.model');
+const Author = require('../models/Author.model');
+const Genre = require('../models/Genre.model');
 
 //?------------------------- utils -------------------------------
 const { validEnumGender, validEnumLanguage } = require('../../utils/validEnum')
@@ -17,6 +19,7 @@ const { deleteImgCloudinary } = require('../../middleware/files.middleware');
 
 //?------------------------- helpers ------------------------------
 
+const setError = require('../../helpers/handleError')
 
 
 
@@ -52,11 +55,9 @@ const create = async (req, res, next) => {
   } catch (error) {
     // si hay un error, hay que borrar la imagen en el cloudinary
     req.file?.path && deleteImgCloudinary(catchImg);
-    next(error); // pasa el error al siguiente controlador o middleware
-    return res.status(404).json({
-      error: 'no se ha podido crear el elemento',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error general to create')
+    );
   }
 };
 //*---------------------------------- read ---------------------------------------
@@ -128,6 +129,9 @@ const getByName = async (req, res) => {
     });
   }
 };
+
+
+
 
 //*--------------------------------- PATCH ---------------------------------
 
@@ -220,10 +224,9 @@ const update = async (req, res) => {
       }
     }
   } catch (error) {
-    res.status(404).json({
-      error: 'error en el update',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'General error to update')
+    );
   }
 };
 
@@ -293,10 +296,9 @@ const toggleBooks = async (req, res, next) => {
       });
     });
   } else {
-    return res.status(404).json({
-      error: 'este autor no existe',
-      message: error.message
-    });
+    return next(
+      setError(500, error.message || 'General error to update')
+    );
   }
 };
 
@@ -354,10 +356,9 @@ const deleteAuthor = async (req, res) => {
       return res.status(404).json('este autor no existe');
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'no se ha podido borrar',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error to delete')
+    );
   }
 };
 

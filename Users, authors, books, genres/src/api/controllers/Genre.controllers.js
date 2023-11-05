@@ -1,21 +1,20 @@
 //?------------------------ modelos ------------------------------
-
+const Genre = require('../models/Genre.model');
+const Author = require('../models/Author.model');
+const Book = require('../models/Book.model');
+const User = require('../models/User.models');
 
 //?------------------------- utils -------------------------------
-const validEnumGenre = require('../../utils/validEnum')
-
+const { validEnumGenre } = require('../../utils/validEnum');
 
 //?----------------------- middleware -----------------------------
 
-
 //?------------------------ librería ------------------------------
-
 
 //?------------------------- estados ------------------------------
 
 //?------------------------- helpers ------------------------------
-
-
+const setError = require('../../helpers/handleError');
 
 //*-------------------------------- POST ------------------------------------------
 
@@ -23,9 +22,21 @@ const validEnumGenre = require('../../utils/validEnum')
 //! -------------------------------- CREATE ----------------------------------------
 //?---------------------------------------------------------------------------------
 
+const createGenre = async (req, res, next) => {
+  try {
+    await Genre.syncIndexes();
+    const newGenre = new Genre(req.body);
+    const saveGenre = await newGenre.save();
 
-
-
+if(saveGenre){
+    return res.status(200).json(saveGenre)
+}else{
+    return res.status(404).json('Couldnt create genre')
+}
+  } catch (error) {
+    return next(setError(500, error.message || 'Error to create'));
+  }
+};
 
 //*---------------------------------- read ---------------------------------------
 
@@ -35,24 +46,9 @@ const validEnumGenre = require('../../utils/validEnum')
 
 //* ---------------------- get by id ---------------------------
 
-
-
 //* ------------------------- get all ---------------------------
 
-
-
 //* ------------------------- get by name ---------------------------
-
-
-
-
-
-
-
-
-
-
-
 
 //*--------------------------------- PATCH ---------------------------------
 
@@ -60,19 +56,9 @@ const validEnumGenre = require('../../utils/validEnum')
 //! ---------------------------- GENERAL UPDATE ------------------------------------
 //?---------------------------------------------------------------------------------
 
-
-
-
-
 //?---------------------------------------------------------------------------------
 //! ---------------------------- TOGGLE BOOKS --------------------------------------
 //?-------------------------------- update -----------------------------------------
-
-
-
-
-
-
 
 //*------------------------------- delete ---------------------------------------
 
@@ -80,6 +66,4 @@ const validEnumGenre = require('../../utils/validEnum')
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
 
-
-
-const Genre = require('./../models/Genre.model')
+module.exports = { createGenre };

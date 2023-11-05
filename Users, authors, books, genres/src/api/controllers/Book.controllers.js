@@ -1,6 +1,8 @@
 //?------------------------ modelos ------------------------------
-const Author = require('./../models/Author.model');
+const User = require('../models/User.models');
 const Book = require('../models/Book.model');
+const Author = require('../models/Author.model');
+const Genre = require('../models/Genre.model');
 
 //?------------------------- utils -------------------------------
 
@@ -13,7 +15,8 @@ const Book = require('../models/Book.model');
 //?------------------------- estados ------------------------------
 
 //?------------------------- helpers ------------------------------
-
+ 
+const setError = require('../../helpers/handleError')
 
 
 
@@ -30,17 +33,15 @@ const createBook = async (req, res, next) => {
     console.log(req.body);
     const newBook = new Book(req.body); //nuevo modelo -- nueva instancia
     const savedBook = await newBook.save();
+    
 
     return res
       .status(savedBook ? 200 : 404)
       .json(savedBook ? savedBook : 'error al postear');
   } catch (error) {
-    return (
-      res.status(404).json({
-        error: 'error en el catch del post',
-        message: error.message,
-      }) && next(error)
-    ); //para mandarlo al siguiente
+    return next(
+      setError(500, error.message || 'Error to create')
+    );
   }
 };
 
@@ -282,10 +283,9 @@ const deleteBooks = async (req, res) => {
       return res.status(404).json('no se ha encontrado este libro');
     }
   } catch (error) {
-    return res.status(404).json({
-      error: 'error en el catch del delete',
-      message: error.message,
-    });
+    return next(
+      setError(500, error.message || 'Error to delete')
+    );
   }
 };
 

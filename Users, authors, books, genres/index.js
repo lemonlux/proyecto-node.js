@@ -42,6 +42,9 @@ app.use('/api/v1/authors/', AuthorRoutes);
 const BookRoutes = require('./src/api/routes/Book.routes');
 app.use('/api/v1/books/', BookRoutes);
 
+const GenreRoutes = require('./src/api/routes/Genre.routes')
+app.use('/api/v1/genres/', GenreRoutes)
+
 //!---6---- ERRORES DE RUTA Y CRASH
 
 app.use('*', (req, res, next) => {

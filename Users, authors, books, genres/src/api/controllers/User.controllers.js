@@ -160,11 +160,8 @@ const userRegister = async (req, res, next) => {
     }
   } catch (error) {
     req.file?.path && deleteImgCloudinary(catchImg); //!--??
-    return (
-      res.status(404).json({
-        error: 'error en el catch general',
-        message: error.message,
-      }) && next(error)
+    return next(
+      setError(500, error.message || 'Error general to register')
     );
   }
 };
@@ -240,11 +237,8 @@ const stateRegister = async (req, res, next) => {
     }
   } catch (error) {
     req.file && deleteImgCloudinary(catchImg);
-    return (
-      res.status(404).json({
-        error: 'error en el catch general',
-        message: error.message,
-      }) && next(error)
+    return next(
+      setError(500, error.message || 'Error general to register')
     );
   }
 };
@@ -306,11 +300,8 @@ const redirectRegister = async (req, res, next) => {
   } catch (error) {
     //da feedback al usuario y a nosotros
     req.file && deleteImgCloudinary(catchImg);
-    return (
-      res.status(404).json({
-        error: 'error en el catch general',
-        message: error.message,
-      }) && next(error)
+    return next(
+      setError(500, error.message || 'Error general to register')
     );
   }
 };
@@ -362,10 +353,9 @@ const sendCode = async (req, res, next) => {
       }
     });
   } catch (error) {
-    res.status(404).json({
-      error: 'error en el catch del sendcode',
-      message: error.message,
-    }) && next(error);
+    return next(
+      setError(500, error.message || 'General error to send mail')
+    );
   }
 };
 
@@ -403,7 +393,7 @@ const login = async (req, res) => {
     }
   } catch (error) {
     return next(
-      setError(500, error.message || 'Error general to sendResendCode')
+      setError(500, error.message || 'General error to login')
     );
   }
 };
@@ -438,7 +428,7 @@ const autoLogin = async (req, res) => {
     }
   } catch (error) {
     return next(
-      setError(500, error.message || 'Error general to sendResendCode')
+      setError(500, error.message || 'General error to auto log')
     );
   }
 };
@@ -492,7 +482,7 @@ const resendCode = async (req, res) => {
     }
   } catch (error) {
     return next(
-      setError(500, error.message || 'Error general to sendResendCode')
+      setError(500, error.message || 'Error general to resendCode')
     );
   }
 };
@@ -570,11 +560,8 @@ const verifyCode = async (req, res, next) => {
       return res.status(200).json('This user does not exist');
     }
   } catch (error) {
-    return (
-      res.status(404).json({
-        error: 'error en el catch',
-        message: error.message,
-      }) && next(error)
+    return next(
+      setError(500, error.message || 'General error to verify code')
     );
   }
 };
