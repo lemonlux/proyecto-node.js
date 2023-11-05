@@ -46,9 +46,76 @@ if(saveGenre){
 
 //* ---------------------- get by id ---------------------------
 
+const getGenreById = async (req,res,next) =>{
+
+    try {
+        const { id } = req.params
+        const genreById = await Genre.findById(id)
+
+        return res.status( genreById ? 200 : 404).json( genreById ? genreById : 'no se ha encontrado este género')
+        
+    } catch (error) {
+        return res.status(404).json({
+            error: 'error en el catch de get by id',
+            message: error.message,
+          });
+    }
+
+
+}
+
+
+
+
+
 //* ------------------------- get all ---------------------------
 
+const getAllGenres = async (req,res,next) =>{
+    try {
+        const allGenres = await Genre.find()
+
+        if(allGenres.length > 0){
+            return res.status(200).json(allGenres)
+
+        }else{
+            return res.status(404).json('no se encontraron géneros')
+        }
+
+
+    } catch (error) {
+        return res.status(404).json({
+            error: 'error en el catch de get by id',
+            message: error.message,
+          });
+    }
+}
+
+
 //* ------------------------- get by name ---------------------------
+
+const getGenreByName = async (req,res,next) =>{
+try {
+    const { type } = req.params
+    console.log(req.body)
+
+    const genreByType = await Genre.find({ type })
+
+    return res.status( genreByType ? 200 : 404).json( genreByType ? genreByType : 'no se ha encontrado el género')
+    
+} catch (error) {
+    return res.status(404).json({
+        error: 'error en el catch de get by id',
+        message: error.message,
+      });
+}
+
+}
+
+
+
+
+
+
 
 //*--------------------------------- PATCH ---------------------------------
 
@@ -66,4 +133,9 @@ if(saveGenre){
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
 
-module.exports = { createGenre };
+module.exports = { 
+    createGenre,
+    getGenreById,
+    getAllGenres,
+    getGenreByName
+};
