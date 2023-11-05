@@ -1,8 +1,8 @@
 //?------------------------ modelos ------------------------------
 const User = require('../models/User.models');
-const Book = require('../models/Book.model')
-const Author = require('../models/Author.model')
-const Genre = require('../models/Genre.model')
+const Book = require('../models/Book.model');
+const Author = require('../models/Author.model');
+const Genre = require('../models/Genre.model');
 
 //?------------------------- utils --------------------------------
 const randomCode = require('../../utils/randomCode');
@@ -23,15 +23,11 @@ const validator = require('validator');
 //?------------------------- estados ------------------------------
 const { setSendEmail, getSendEmail } = require('../../state/state.data');
 
-
 //?------------------------- helpers ------------------------------
 
-const setError = require('../../helpers/handleError')
-
-
+const setError = require('../../helpers/handleError');
 
 //* ________________________________ READ _________________________________________
-
 
 //?---------------------------------------------------------------------------------
 //! --------------------------- GET BY ID, EMAIL -----------------------------------
@@ -77,8 +73,6 @@ const userByEmail = async (req, res) => {
     });
   }
 };
-
-
 
 //* ________________________________ POST _________________________________________
 
@@ -715,7 +709,6 @@ antigua y la actual, comparar la antigua a la guardada y validar que la nueva se
 también vamos a hacer un test para comprobar que se ha modificado correctamente */
 
 const modifyPassword = async (req, res) => {
-  console.log('hola');
   try {
     const { password, newPassword } = req.body;
     const validPassword = validator.isStrongPassword(newPassword);
@@ -765,9 +758,7 @@ const modifyPassword = async (req, res) => {
       return res.status(404).json('Password is not strong enough');
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'Error general modifyPassword')
-    );
+    return next(setError(500, error.message || 'Error general modifyPassword'));
   }
 };
 
@@ -822,7 +813,6 @@ const updateUser = async (req, res) => {
 
     try {
       await User.findByIdAndUpdate(req.user._id, updating);
-      console.log(await User.findById(req.user._id));
       if (req.file) deleteImgCloudinary(req.user.image);
 
       //todo-------- TESTING
@@ -871,130 +861,100 @@ const updateUser = async (req, res) => {
       });
     }
   } catch (error) {
+    return next(setError(500, error.message || 'Error general updateUser'));
+  }
+};
+
+//?---------------------------------------------------------------------------------
+//! ----------------------------- FAVOURITE BOOK ----------------------------------- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//?---------------------------------------------------------------------------------
+//vamos a sacar el book por los params y la info del usuario (fav Books, id) por el token-- req.user
+
+const addFavouriteBook = async (req, res, next) => {
+  console.log('entro');
+  try {
+    const { _id, favBooks } = req.user;
+    const { idBook } = req.params;
+
+    //si en el usuario no se encuentra esa movie la metemos, si sí se encuentra la sacamos --- TOGGLE
+
+    if (favBooks.includes(idBook)) {
+      // TENEMOS QUE SACAR EL LIBRO DE LOS LIKES EL USUARIO, Y EL USUARIO DEL REGISTRO DE LIKES DEL LIBRO
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { favBooks: idBook },
+        });
+
+        try {
+          await Book.findByIdAndUpdate(idBook, {
+            $pull: { likes: _id },
+          });
+
+          //!------- respuesta ------------- dentro de este try si todo ha salido bien
+
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            bookUpdated: await Book.findById(idBook),
+            update: `pulled ${idBook} from User's likes`,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch pull user',
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch pull book',
+          message: error.message,
+        });
+      }
+    } else {
+      //lo sacamos
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { favBooks: idBook },
+        });
+
+        try {
+          await Book.findByIdAndUpdate(idBook, {
+            $push: { likes: _id },
+          });
+
+          //!------- respuesta ------------- dentro de este try si todo ha salido bien
+
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            bookUpdated: await Book.findById(idBook),
+            update: `pushed ${idBook} to User's likes`,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch push user',
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch push book',
+          message: error.message,
+        });
+      }
+    }
+  } catch (error) {
     return next(
-      setError(500, error.message || 'Error general updateUser')
+      setError(500, error.message || 'Error general addFavouriteBook')
     );
   }
 };
 
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOYRITE BOOK -----------------------------------
-//?---------------------------------------------------------------------------------
-//vamos a sacar el book por los params y la info del usuario (fav Books, id) por el token-- req.user
-
-
-const addFavouriteBook = async (req,res,next) =>{
-  try {
-    const { _id, favBooks } = req.user
-    const { idBook } = req.params
-
-    //si en el usuario no se encuentra esa movie la metemos, si sí se encuentra la sacamos --- TOGGLE
-
-    if(favBooks.includes(idBook)){
-// TENEMOS QUE SACAR EL LIBRO DE LOS LIKES EL USUARIO, Y EL USUARIO DEL REGISTRO DE LIKES DEL LIBRO 
-      try {
-        await User.findByIdAndUpdate(_id, {
-          $pull: { favBooks: idBook }
-        })
-    
-        try {
-          await Book.findByIdAndUpdate(idBook, {
-            $pull: { likes: _id }
-          })
-
-          //!------- respuesta ------------- dentro de este try si todo ha salido bien
-
-          return res.status(200).json({
-            userUpdated: await User.findById(_id),
-            bookUpdated: await Book.findById(idBook),
-            update: `pulled ${idBook} from User's likes`
-          })
-
-        } catch (error) {
-          return res.status(404).json({
-            error: 'error en el catch pull user',
-            message: error.message,
-        })
-        }
-
-      } catch (error) {
-        return res.status(404).json({
-          error: 'error en el catch pull book',
-          message: error.message,
-      })
-    }
-
-
-    }else{
-      //lo sacamos
-      try {
-        await User.findByIdAndUpdate(_id, {
-          $push: { favBooks: idBook }
-        })
-    
-        try {
-          await Book.findByIdAndUpdate(idBook, {
-            $push: { likes: _id }
-          })
-
-          //!------- respuesta ------------- dentro de este try si todo ha salido bien
-
-          return res.status(200).json({
-            userUpdated: await User.findById(_id),
-            bookUpdated: await Book.findById(idBook),
-            update: `pushed ${idBook} to User's likes`
-          })
-
-        } catch (error) {
-          return res.status(404).json({
-            error: 'error en el catch push user',
-            message: error.message,
-        })
-        }
-
-
-      } catch (error) {
-        return res.status(404).json({
-          error: 'error en el catch push book',
-          message: error.message,
-      })
-    }
-
-    }
-
-
-  } catch (error) {
-    return next(
-      setError(500, error.message || 'Error general addFavouriteBook')
-    );
-}
-
-
-}
-
-
-
-
-
-
-//?---------------------------------------------------------------------------------
 //! ----------------------------- FAVOURITE AUTHOR ---------------------------------
 //?---------------------------------------------------------------------------------
-
-
-
-
-
 
 //?---------------------------------------------------------------------------------
 //! ----------------------------- FAVOURITE GENRE ----------------------------------
 //?---------------------------------------------------------------------------------
-
-
-
-
-
-
 
 //* ________________________________ delete _________________________________________
 
@@ -1009,12 +969,48 @@ const deleteUser = async (req, res) => {
     await User.findByIdAndDelete(req.user?._id);
     deleteImgCloudinary(req.user?.image);
 
-    //lo buscamos pa ver si se ha borrado correctamente
-    const userTest = await User.findById(req.user?._id);
+    //*----- TENEMOS QUE BORRAR SUS LIKES -----------------
 
-    return res
-      .status(userTest ? 404 : 200)
-      .json({ deleteTest: userTest ? false : true });
+    try {
+      await Author.updateMany(  //metodo .updateMany(filter, update, options)  segun mongoDB
+        { likes: req.user?._id },
+        { $pull: { likes: req.user?._id } }
+      );
+      try {
+        await Book.updateMany(
+          { likes: req.user?._id },
+          { $pull: { likes: req.user?._id } }
+        );
+
+        try {
+          await Genre.updateMany(
+            { likes: req.user?._id },
+            { $pull: { likes: req.user?._id } }
+          );
+
+          //lo buscamos pa ver si se ha borrado correctamente
+          const userTest = await User.findById(req.user?._id);
+          return res
+            .status(userTest ? 404 : 200)
+            .json({ deleteTest: userTest ? false : true });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error catch updating genres',
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error catch updating books',
+          message: error.message,
+        });
+      }
+    } catch (error) {
+      return res.status(404).json({
+        error: 'error catch updating authors',
+        message: error.message,
+      });
+    }
   } catch (error) {
     return res.status(404).json({
       error: 'error en el catch',
@@ -1022,8 +1018,6 @@ const deleteUser = async (req, res) => {
     });
   }
 };
-
-
 
 module.exports = {
   userRegister,
