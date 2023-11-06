@@ -113,7 +113,7 @@ const getBookByName = async (req, res) => {
 //?---------------------------------------------------------------------------------
 
 const getAuthorsByBook = async (req,res,next) =>{
-
+console.log('entro')
  try {
   // const idAuthors = []
   const { id } = req.params
@@ -123,12 +123,12 @@ const getAuthorsByBook = async (req,res,next) =>{
 
     try {
       let authorNames = [];
-  
+    
       Promise.all(
 
-        // console.log('entro'),
+
         bookById.authors.forEach( async (id) =>{
-          console.log(id)
+          // console.log(id)
           try {
             const author = await Author.findById(id)
             const authorName = author.name
@@ -188,8 +188,34 @@ const getAuthorsByBook = async (req,res,next) =>{
 
 }
 
+//?---------------------------------------------------------------------------------
+//! ----------------- GET BOOKS BY PAGES: SHORTEST TO LONGEST -----------------------
+//?---------------------------------------------------------------------------------
 
+const getBookByPages = async (req,res,next) =>{
+  try {
+    const allBooks = await Book.find()
 
+    if(allBooks.length > 0){
+
+     allBooks.sort((a,b)=> a.pages - b.pages)
+     console.log(allBooks)
+
+      return res.status(200).json({
+        allBooks
+      })
+
+    }else{
+      return res.status(404).json('no se han encontrado libros')
+    }
+
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to find')
+    );
+  }
+
+}
 
 
 
@@ -472,6 +498,7 @@ module.exports = {
   getAllBooks,
   getBookByName,
   getAuthorsByBook,
+  getBookByPages,
   updateBooks,
   deleteBooks,
 };
