@@ -6,16 +6,16 @@ const items = [
     { name: "Magnetic", value: 13 },
     { name: "Zeros", value: 37 },
   ];
-//   items.sort(function (a, b) {
-//     if (a.name > b.name) {
-//       return 1;
-//     }
-//     if (a.name < b.name) {
-//       return -1;
-//     }
-//     // a must be equal to b
-//     return 0;
-//   });
+  items.sort((a, b) => {
+    if (a.name > b.name) {
+      return 1;
+    }
+    if (a.name < b.name) {
+      return -1;
+    }
+    // a must be equal to b
+    return 0;
+  });
   
 
 //   console.log(items)
@@ -24,6 +24,6 @@ const items = [
 //     return a.value - b.value
 //   })  
 
-items.sort((a,b)=> a.value - b.value)
+// items.sort((a,b)=> a.value - b.value)
 
   console.log(items)

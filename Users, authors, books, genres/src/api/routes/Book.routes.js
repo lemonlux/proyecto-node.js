@@ -8,6 +8,9 @@ const {
   updateBooks,
   getAuthorsByBook,
   getBookByPages,
+  getBooksByDate,
+  getBooksAtoZ,
+  getBooksMoreLiked,
   deleteBooks,
 } = require('../controllers/Book.controllers');
 const { isAuth, isAuthAsAdmin } = require('../../middleware/auth.middleware')
@@ -24,6 +27,9 @@ BookRoutes.get('/', getAllBooks);
 BookRoutes.get('/byName/:name', getBookByName);
 BookRoutes.get('/findAuthor/:id', getAuthorsByBook)
 BookRoutes.get('/sort/sortByLength/', getBookByPages)
+BookRoutes.get('/sort/sortByDate/', getBooksByDate)
+BookRoutes.get('/sort/sortAtoZ/', getBooksAtoZ)
+BookRoutes.get('/sort/mostLiked/', getBooksMoreLiked)
 
 //!--------- CON AUTH DE ADMIN---------------------
 

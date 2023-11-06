@@ -112,84 +112,128 @@ const getBookByName = async (req, res) => {
 //! -------------------------- GET AUTHORS BY BOOK ---------------------------------
 //?---------------------------------------------------------------------------------
 
-const getAuthorsByBook = async (req,res,next) =>{
-console.log('entro')
- try {
-  // const idAuthors = []
-  const { id } = req.params
-  const bookById = await Book.findById(id)
+const getAuthorsByBook = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const bookById = await Book.findById(id);
 
-  if(bookById){
-
-    try {
-      let authorNames = [];
-    
-      Promise.all(
-
-
-        bookById.authors.forEach( async (id) =>{
-          // console.log(id)
-          try {
-            const author = await Author.findById(id)
-            const authorName = author.name
-            console.log(authorName)
-            authorNames.push(authorName)
-            console.log(authorNames)
-
-          } catch (error) {
-            return res.status(404).json('no se ha encontrado')
-          }
-          // const author = await Author.findById(id)
-          // console.log(author, author.name)
-        
-     
-        })
-
-      ).then( async () =>{
-        console.log('autores', authorNames)
-      return res.status(200).json(authorNames)
-
-      })
-      // bookById.authors.forEach( async (id) =>{
-      //   // console.log(id)
-      //   const author = await Author.findById(id)
-      //   // console.log(author, author.name)
-      
-      //   const authorName = author.name
-      //   console.log(authorName)
-      //   authorNames.push(authorName)
-      //   console.log(authorNames)
-      // })
-
-      // console.log('authores', authorNames)
-      // return res.status(200).json(authorNames)
-  
-    } catch (error) {
+    if (!bookById) {
       return res.status(404).json({
-        error: 'authors not found',
+        error: 'Book not found',
         message: error.message,
       });
     }
+    
+    const authorIds = bookById.authors;
+    console.log(authorIds)
+    const authorNames = [];
 
-  }else{
-    return res.status(404).json({
-          error: 'book not found',
+    for (let id of authorIds) {
+      const author = await Author.findById(id);
+
+      if (!author) {
+        return res.status(404).json({
+          error: 'Author not found',
           message: error.message,
         });
+      }
+
+      authorNames.push(author.name);
+    }
+
+    if (authorNames.length > 0) {
+      return res.status(200).json(authorNames);
+    } else {
+      return res.status(404).json({
+        error: 'No authors found for the book',
+        message: 'No authors found for the book',
+      });
+    }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error finding authors'));
   }
-
- } catch (error) {
-   return next(
-      setError(500, error.message || 'Error to find')
-    );
- }
+};
 
 
 
-}
+// const getAuthorsByBook = async (req,res,next) =>{
+// console.log('entro')
+//  try {
+//   // const idAuthors = []
+//   const { id } = req.params
+//   const bookById = await Book.findById(id)
+
+//   if(bookById){
+
+//     try {
+//       let authorNames = [];
+    
+//       Promise.all(
+
+
+//         bookById.authors.forEach( async (id) =>{
+//           // console.log(id)
+//           try {
+//             const author = await Author.findById(id)
+//             const authorName = author.name
+//             console.log(authorName)
+//             authorNames.push(authorName)
+//             console.log(authorNames)
+
+//           } catch (error) {
+//             return res.status(404).json('no se ha encontrado')
+//           }
+//           // const author = await Author.findById(id)
+//           // console.log(author, author.name)
+        
+     
+//         })
+
+//       ).then( async () =>{
+//         console.log('autores', authorNames)
+//       return res.status(200).json(authorNames)
+
+//       })
+//       // bookById.authors.forEach( async (id) =>{
+//       //   // console.log(id)
+//       //   const author = await Author.findById(id)
+//       //   // console.log(author, author.name)
+      
+//       //   const authorName = author.name
+//       //   console.log(authorName)
+//       //   authorNames.push(authorName)
+//       //   console.log(authorNames)
+//       // })
+
+//       // console.log('authores', authorNames)
+//       // return res.status(200).json(authorNames)
+  
+//     } catch (error) {
+//       return res.status(404).json({
+//         error: 'authors not found',
+//         message: error.message,
+//       });
+//     }
+
+//   }else{
+//     return res.status(404).json({
+//           error: 'book not found',
+//           message: error.message,
+//         });
+//   }
+
+//  } catch (error) {
+//    return next(
+//       setError(500, error.message || 'Error to find')
+//     );
+//  }
+
+
+
+// }
 
 //?---------------------------------------------------------------------------------
-//! ----------------- GET BOOKS BY PAGES: SHORTEST TO LONGEST -----------------------
+//! --------------------- SORT BY PAGES: SHORTEST TO LONGEST -----------------------
 //?---------------------------------------------------------------------------------
 
 const getBookByPages = async (req,res,next) =>{
@@ -214,10 +258,100 @@ const getBookByPages = async (req,res,next) =>{
       setError(500, error.message || 'Error to find')
     );
   }
-
 }
 
+//?---------------------------------------------------------------------------------
+//! ---------------------- SORT BY DATE: NEWEST TO OLDEST --------------------------
+//?---------------------------------------------------------------------------------
 
+const getBooksByDate = async (req,res,next) =>{
+try {
+  const allBooks = await Book.find()
+  if(allBooks.length > 0){
+
+    allBooks.sort((a,b)=> b.published - a.published)
+    console.log(allBooks)
+
+     return res.status(200).json({
+       allBooks
+     })
+
+   }else{
+     return res.status(404).json('no se han encontrado libros')
+   }
+
+
+} catch (error) {
+  return next(
+    setError(500, error.message || 'Error to find')
+  );
+}
+}
+//?---------------------------------------------------------------------------------
+//! ------------------------------- SORT BY A-Z ------------------------------------
+//?---------------------------------------------------------------------------------
+
+const getBooksAtoZ = async (req,res,next) =>{
+  try {
+    const allBooks = await Book.find()
+    if(allBooks.length > 0){
+  
+      allBooks.sort((a,b)=>{
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        return 0;
+      });
+      console.log(allBooks)
+  
+       return res.status(200).json({
+         allBooks
+       })
+  
+     }else{
+       return res.status(404).json('no se han encontrado libros')
+     }
+  
+  
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to find')
+    );
+  }
+  }
+
+//?---------------------------------------------------------------------------------
+//! --------------------------- SORT BY MOST LIKED ---------------------------------
+//?---------------------------------------------------------------------------------
+
+const getBooksMoreLiked = async (req,res,next) =>{
+  try {
+    const allBooks = await Book.find()
+    if(allBooks.length > 0){
+  
+      allBooks.sort((a,b)=> b.likes.length - a.likes.length)
+
+
+      console.log(allBooks)
+  
+       return res.status(200).json({
+         allBooks
+       })
+  
+     }else{
+       return res.status(404).json('no se han encontrado libros')
+     }
+  
+  
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to find')
+    );
+  }
+  }
 
 //*    ----------------------------------------------------------------------------------
 //todo ------------------------------- CON AUTH -----------------------------------------
@@ -499,6 +633,9 @@ module.exports = {
   getBookByName,
   getAuthorsByBook,
   getBookByPages,
+  getBooksByDate,
+  getBooksAtoZ,
+  getBooksMoreLiked,
   updateBooks,
   deleteBooks,
 };
