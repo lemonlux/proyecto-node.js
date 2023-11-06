@@ -33,6 +33,8 @@ const setError = require('../../helpers/handleError');
 //! --------------------------- GET BY ID, EMAIL -----------------------------------
 //?---------------------------------------------------------------------------------
 
+//* ---------------------- get by id ---------------------------
+
 const userById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -49,6 +51,10 @@ const userById = async (req, res) => {
     });
   }
 };
+
+//* ---------------------- get by email ---------------------------
+
+
 
 const userByEmail = async (req, res) => {
   try {

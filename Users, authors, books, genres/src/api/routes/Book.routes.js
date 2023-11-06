@@ -6,6 +6,7 @@ const {
   getAllBooks,
   getBookByName,
   updateBooks,
+  getAuthorsByBook,
   deleteBooks,
 } = require('../controllers/Book.controllers');
 const { isAuth, isAuthAsAdmin } = require('../../middleware/auth.middleware')
@@ -20,6 +21,7 @@ const BookRoutes = require('express').Router();
 BookRoutes.get('/:id', getBookById);
 BookRoutes.get('/', getAllBooks);
 BookRoutes.get('/byName/:name', getBookByName);
+BookRoutes.get('/findAuthor/:id', getAuthorsByBook)
 
 //!--------- CON AUTH DE ADMIN---------------------
 

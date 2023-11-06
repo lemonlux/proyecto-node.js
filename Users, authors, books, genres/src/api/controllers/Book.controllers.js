@@ -16,7 +16,9 @@ const Genre = require('../models/Genre.model');
 
 //?------------------------- helpers ------------------------------
  
-const setError = require('../../helpers/handleError')
+const setError = require('../../helpers/handleError');
+const { callbackPromise } = require('nodemailer/lib/shared');
+const { Promise } = require('mongoose');
 
 
 
@@ -105,6 +107,96 @@ const getBookByName = async (req, res) => {
     });
   }
 };
+
+//?---------------------------------------------------------------------------------
+//! -------------------------- GET AUTHORS BY BOOK ---------------------------------
+//?---------------------------------------------------------------------------------
+
+const getAuthorsByBook = async (req,res,next) =>{
+
+ try {
+  // const idAuthors = []
+  const { id } = req.params
+  const bookById = await Book.findById(id)
+
+  if(bookById){
+
+    try {
+      let authorNames = [];
+  
+      Promise.all(
+
+        // console.log('entro'),
+        bookById.authors.forEach( async (id) =>{
+          console.log(id)
+          try {
+            const author = await Author.findById(id)
+            const authorName = author.name
+            console.log(authorName)
+            authorNames.push(authorName)
+            console.log(authorNames)
+
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado')
+          }
+          // const author = await Author.findById(id)
+          // console.log(author, author.name)
+        
+     
+        })
+
+      ).then( async () =>{
+        console.log('autores', authorNames)
+      return res.status(200).json(authorNames)
+
+      })
+      // bookById.authors.forEach( async (id) =>{
+      //   // console.log(id)
+      //   const author = await Author.findById(id)
+      //   // console.log(author, author.name)
+      
+      //   const authorName = author.name
+      //   console.log(authorName)
+      //   authorNames.push(authorName)
+      //   console.log(authorNames)
+      // })
+
+      // console.log('authores', authorNames)
+      // return res.status(200).json(authorNames)
+  
+    } catch (error) {
+      return res.status(404).json({
+        error: 'authors not found',
+        message: error.message,
+      });
+    }
+
+  }else{
+    return res.status(404).json({
+          error: 'book not found',
+          message: error.message,
+        });
+  }
+
+ } catch (error) {
+   return next(
+      setError(500, error.message || 'Error to find')
+    );
+ }
+
+
+
+}
+
+
+
+
+
+
+//*    ----------------------------------------------------------------------------------
+//todo ------------------------------- CON AUTH -----------------------------------------
+//todo -------------------------------DE ADMIN  -----------------------------------------
+//*    ----------------------------------------------------------------------------------
 
 //*-------------------------------- PATCH -----------------------------------------
 
@@ -379,6 +471,7 @@ module.exports = {
   getBookById,
   getAllBooks,
   getBookByName,
+  getAuthorsByBook,
   updateBooks,
   deleteBooks,
 };
