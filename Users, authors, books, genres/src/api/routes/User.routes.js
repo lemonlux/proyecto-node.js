@@ -21,6 +21,8 @@ const {
   deleteUser,
   updateUser,
   addFavouriteBook,
+  addFavouriteAuthor,
+  addFavouriteGenre
 } = require('../controllers/User.controllers');
 
 //*--------------------- ROUTER ----------------------------
@@ -61,6 +63,8 @@ UserRoutes.patch(
   updateUser
 );
 UserRoutes.patch('/addBook/:idBook', [isAuth], addFavouriteBook)
+UserRoutes.patch('/addAuthor/:idAuthor', [isAuth], addFavouriteAuthor)
+UserRoutes.patch('/addGenre/:idGenre', [isAuth], addFavouriteGenre)
 //el middleware NUESTRO (personalizado) se mete entre corchetes. podemos meter varios pero el orden importa
 
 //!---------- controladores de redirect

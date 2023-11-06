@@ -853,12 +853,11 @@ const updateUser = async (req, res) => {
 };
 
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOURITE BOOK ----------------------------------- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//! ----------------------------- FAVOURITE BOOK ----------------------------------- 
 //?---------------------------------------------------------------------------------
 //vamos a sacar el book por los params y la info del usuario (fav Books, id) por el token-- req.user
 
 const addFavouriteBook = async (req, res, next) => {
-  console.log('entro');
   try {
     const { _id, favBooks } = req.user;
     const { idBook } = req.params;
@@ -878,11 +877,12 @@ const addFavouriteBook = async (req, res, next) => {
           });
 
           //!------- respuesta ------------- dentro de este try si todo ha salido bien
+          const bookUpdated = await Book.findById(idBook)
 
           return res.status(200).json({
             userUpdated: await User.findById(_id),
-            bookUpdated: await Book.findById(idBook),
-            update: `pulled ${idBook} from User's likes`,
+            bookUpdated,
+            update: `pulled ${bookUpdated.name} from User's likes`,
           });
         } catch (error) {
           return res.status(404).json({
@@ -910,10 +910,12 @@ const addFavouriteBook = async (req, res, next) => {
 
           //!------- respuesta ------------- dentro de este try si todo ha salido bien
 
+          const bookUpdated = await Book.findById(idBook)
+
           return res.status(200).json({
             userUpdated: await User.findById(_id),
-            bookUpdated: await Book.findById(idBook),
-            update: `pushed ${idBook} to User's likes`,
+            bookUpdated,
+            update: `pushed ${bookUpdated.name} to User's likes`,
           });
         } catch (error) {
           return res.status(404).json({
@@ -939,7 +941,87 @@ const addFavouriteBook = async (req, res, next) => {
 //! ----------------------------- FAVOURITE AUTHOR ---------------------------------
 //?---------------------------------------------------------------------------------
 
+const addFavouriteAuthor = async (req,res,next) =>{
+try {
+  const { _id, favAuthors } = req.user
+  const { idAuthor } = req.params
 
+  if(favAuthors.includes(idAuthor)){
+    try {
+      await User.findByIdAndUpdate(_id, {
+        $pull: { favAuthors: idAuthor },
+      });
+
+      try {
+        await Author.findByIdAndUpdate(idAuthor, {
+          $pull: { likes: _id },
+        });
+
+        
+        const authorUpdated = await Author.findById(idAuthor)
+
+        return res.status(200).json({
+          userUpdated: await User.findById(_id),
+          authorUpdated,
+          update: `pulled ${authorUpdated.name} from User's likes`,
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch pull user',
+          message: error.message,
+        });
+      }
+    } catch (error) {
+      return res.status(404).json({
+        error: 'error en el catch pull author',
+        message: error.message,
+      });
+    }
+
+  }else{
+    try {
+      await User.findByIdAndUpdate(_id, {
+        $push: { favAuthors: idAuthor },
+      });
+
+      try {
+        await Author.findByIdAndUpdate(idAuthor, {
+          $push: { likes: _id },
+        });
+
+        
+        const authorUpdated = await Author.findById(idAuthor)
+
+        return res.status(200).json({
+          userUpdated: await User.findById(_id),
+          authorUpdated,
+          update: `pushed ${authorUpdated.name} to User's likes`,
+        });
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch push user',
+          message: error.message,
+        });
+      }
+    } catch (error) {
+      return res.status(404).json({
+        error: 'error en el catch push author',
+        message: error.message,
+      });
+    }
+
+  }
+
+
+
+
+} catch (error) {
+  return next(
+    setError(500, error.message || 'Error to add favourite author')
+  );
+}
+
+}
 
 
 
@@ -949,7 +1031,85 @@ const addFavouriteBook = async (req, res, next) => {
 //?---------------------------------------------------------------------------------
 
 
+const addFavouriteGenre = async (req,res,next) =>{
+  try {
+    const { _id, favGenres } = req.user
+    const { idGenre } = req.params
 
+    if(favGenres.includes(idGenre)){
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $pull: { favGenres: idGenre },
+        });
+  
+        try {
+          await Author.findByIdAndUpdate(idGenre, {
+            $pull: { likes: _id },
+          });
+  
+          
+          const genreUpdated = await Genre.findById(idGenre)
+  
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            genreUpdated,
+            update: `pulled ${genreUpdated.type} from User's likes`,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch pull user',
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch pull genre',
+          message: error.message,
+        });
+      }
+    }else{
+      try {
+        await User.findByIdAndUpdate(_id, {
+          $push: { favGenres: idGenre },
+        });
+  
+        try {
+          await Author.findByIdAndUpdate(idGenre, {
+            $push: { likes: _id },
+          });
+  
+          
+          const genreUpdated = await Genre.findById(idGenre)
+  
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            genreUpdated,
+            update: `pushed ${genreUpdated.type} to User's likes`,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch push user',
+            message: error.message,
+          });
+        }
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error en el catch push genre',
+          message: error.message,
+        });
+      }
+    }
+  
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to add favourite genre')
+    );
+  }
+  
+  
+
+
+}
 
 
 
@@ -1032,4 +1192,6 @@ module.exports = {
   deleteUser,
   updateUser,
   addFavouriteBook,
+  addFavouriteAuthor,
+  addFavouriteGenre 
 };
