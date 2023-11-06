@@ -35,6 +35,12 @@ const AuthorSchema = new Schema(
         ref: 'Book',
       },
     ],
+    genres: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Genre',
+      },
+    ],
     likes: [
       {
         type: mongoose.Schema.Types.ObjectId,

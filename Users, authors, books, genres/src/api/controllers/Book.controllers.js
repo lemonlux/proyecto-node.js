@@ -172,7 +172,7 @@ const toggleAuthors = async (req, res, next) => {
       })
     ).then(async () => {
       return res.status(200).json({
-        dataUpdate: await Book.findById(id),
+        dataUpdate: await Book.findById(id).populate('authors'),
       });
     });
   } else {
@@ -184,7 +184,71 @@ const toggleAuthors = async (req, res, next) => {
 //! --------------------------- TOGGLE GENRES -------------------------------------
 //?-------------------------------- update -----------------------------------------
 
-
+const toggleGenres = async (req, res, next) => {
+  //lo vamos a localizar con un id
+  const { id } = req.params;   // BOOK
+  const { genres } = req.body; //esto crea un string separado por comas de los autores
+  const bookById = await Book.findById(id);
+  if (bookById) {
+    const arrayIdGenres = genres.split(',');
+    //recorremos el array creado con un mapeo y dentro de una promesa para manejar asincronías
+    // console.log(bookById);
+    Promise.all(
+      arrayIdGenres.map(async (genre) => {
+        console.log(genre)
+        if (bookById.genres.includes(genre)) {
+          try {
+            await Book.findByIdAndUpdate(id, {
+              $pull: { genres: genre },
+            });
+            try {
+              await Author.findByIdAndUpdate(genre, {
+                $pull: { books: id },
+              });
+            } catch (error) {
+              res.status(404).json({
+                error: 'error al actualizar el escritor',
+                message: error.message,
+              }) && next(error);
+            }
+          } catch (error) {
+            res.status(404).json({
+              error: 'error al actualizar el libro',
+              message: error.message,
+            }) && next(error);
+          }
+        } else {
+          try {
+            await Book.findByIdAndUpdate(id, {
+              $push: { genres: genre },
+            });
+            try {
+              await Author.findByIdAndUpdate(genre, {
+                $push: { books: id },
+              });
+            } catch (error) {
+              res.status(404).json({
+                error: 'error al actualizar el escritor',
+                message: error.message,
+              }) && next(error);
+            }
+          } catch (error) {
+            res.status(404).json({
+              error: 'error al actualizar el libro',
+              message: error.message,
+            }) && next(error);
+          }
+        }
+      })
+    ).then(async () => {
+      return res.status(200).json({
+        dataUpdate: await Book.findById(id).populate('genres'),
+      });
+    });
+  } else {
+    return res.status(404).json('este libro no existe');
+  }
+};
 
 
 //?---------------------------------------------------------------------------------
@@ -257,30 +321,49 @@ const updateBooks = async (req, res) => {
 //?---------------------------------------------------------------------------------
 
 const deleteBooks = async (req, res) => {
+
   try {
     const { id } = req.params;
-    const bookToDelete = await Book.findByIdAndDelete(id);
-    // se ha elimiando??
-    if (bookToDelete) {
-      //lo buscamos una vez borrado a ver si se ha elimnado
-      const bookById = await Book.findById(id);
-      try {
-        const test = await Author.updateMany(
+    await Book.findByIdAndDelete(id);
+
+    try {
+        await Author.updateMany(
           { books: id },
           { $pull: { books: id } }
-        );
+        )
+      try {
+          await Genre.updateMany(
+            { books: id },
+            { $pull: { books: id }}
+          )
+          try {
+            await User.updateMany(
+              { favBooks: id },
+              { $pull: { favBooks: id } }
+            )
 
-        return res
-          .status(bookById ? 404 : 200)
-          .json({ deleteTest: bookById ? false : true });
+            const bookDeleted = await Book.findById(id)
+              return res.status( bookDeleted ? 404 : 200).json( bookDeleted ? 'error deleting book' : 'this book no longer exists')
+
+            
+          } catch (error) {
+            return res.status(404).json({
+              error: 'error catch updating user',
+              message: error.message,
+            });
+          }
       } catch (error) {
         return res.status(404).json({
-          error: 'no se ha podido borrar',
+          error: 'error catch updating genres',
           message: error.message,
         });
       }
-    } else {
-      return res.status(404).json('no se ha encontrado este libro');
+
+    } catch (error) {
+      return res.status(404).json({
+        error: 'error catch updating author',
+        message: error.message,
+      });
     }
   } catch (error) {
     return next(
@@ -292,6 +375,7 @@ const deleteBooks = async (req, res) => {
 module.exports = {
   createBook,
   toggleAuthors,
+  toggleGenres,
   getBookById,
   getAllBooks,
   getBookByName,

@@ -1,21 +1,32 @@
 const {
   createBook,
   toggleAuthors,
+  toggleGenres,
   getBookById,
   getAllBooks,
   getBookByName,
   updateBooks,
   deleteBooks,
 } = require('../controllers/Book.controllers');
+const { isAuth, isAuthAsAdmin } = require('../../middleware/auth.middleware')
+
+
+
+
 
 const BookRoutes = require('express').Router();
 
-BookRoutes.post('/', createBook);
+
 BookRoutes.get('/:id', getBookById);
 BookRoutes.get('/', getAllBooks);
 BookRoutes.get('/byName/:name', getBookByName);
-BookRoutes.patch('/add/:id', toggleAuthors);
-BookRoutes.patch('/update/:id', updateBooks);
-BookRoutes.delete('/:id', deleteBooks);
+
+//!--------- CON AUTH DE ADMIN---------------------
+
+BookRoutes.post('/',[isAuthAsAdmin], createBook);
+BookRoutes.patch('/addAuthors/:id', [isAuthAsAdmin], toggleAuthors);
+BookRoutes.patch('/addGenres/:id', [isAuthAsAdmin], toggleGenres)
+BookRoutes.patch('/update/:id', [isAuthAsAdmin], updateBooks);
+BookRoutes.delete('/:id', [isAuthAsAdmin], deleteBooks);
 
 module.exports = BookRoutes;

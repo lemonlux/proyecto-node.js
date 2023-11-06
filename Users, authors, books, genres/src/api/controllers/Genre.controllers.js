@@ -133,9 +133,67 @@ try {
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
 
+const deleteGenre = async (req, res) => {
+
+    try {
+      const { id } = req.params;
+      await Genre.findByIdAndDelete(id);
+  
+      try {
+          await Book.updateMany(
+            { authors: id },
+            { $pull: { authors: id } }
+          )
+        try {
+            await Author.updateMany(
+              { genres: id },
+              { $pull: { genres: id }}
+            )
+            try {
+              await User.updateMany(
+                { favGenres: id },
+                { $pull: { favGenres: id } }
+              )
+  
+              const genreDeleted = await Genre.findById(id)
+                return res.status( genreDeleted ? 404 : 200).json( genreDeleted ? 'error deleting genre' : 'this genre no longer exists')
+  
+              
+            } catch (error) {
+              return res.status(404).json({
+                error: 'error catch updating user',
+                message: error.message,
+              });
+            }
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error catch updating authors',
+            message: error.message,
+          });
+        }
+  
+      } catch (error) {
+        return res.status(404).json({
+          error: 'error catch updating book',
+          message: error.message,
+        });
+      }
+    } catch (error) {
+      return next(
+        setError(500, error.message || 'Error to delete')
+      );
+    }
+  };
+
+
+
+
+
+
 module.exports = { 
     createGenre,
     getGenreById,
     getAllGenres,
-    getGenreByName
+    getGenreByName,
+    deleteGenre
 };

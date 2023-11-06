@@ -292,7 +292,7 @@ const toggleBooks = async (req, res, next) => {
       })
     ).then(async () => {
       return res.status(200).json({
-        dataUpdate: await Author.findById(id),
+        dataUpdate: await Author.findById(id).populate('books'),
       });
     });
   } else {
@@ -316,6 +316,71 @@ const toggleBooks = async (req, res, next) => {
 //?-------------------------------- update -----------------------------------------
 
 
+const toggleGenres = async (req, res, next) => {
+ 
+  const { id } = req.params;   // id del autor
+  const { genres } = req.body; //esto crea un string separado por comas de los books
+  const authorById = await Author.findById(id);
+  if (authorById) {
+    const arrayIdGenres = genres.split(',');
+    //recorremos el array creado con un mapeo y dentro de una promesa para manejar asincronías
+    Promise.all(
+      arrayIdGenres.map(async (genre) => {
+        if (authorById.genres.includes(genre)) {
+          try {
+            await Author.findByIdAndUpdate(id, {
+              $pull: { genres: genre },
+            });
+            try {
+              await Genre.findByIdAndUpdate(genre, {
+                $pull: { authors: id },
+              });
+            } catch (error) {
+              res.status(404).json({
+                error: 'error updating genre',
+                message: error.message,
+              }) && next(error);
+            }
+          } catch (error) {
+            res.status(404).json({
+              error: 'error updating author',
+              message: error.message,
+            }) && next(error);
+          }
+        } else {
+          try {
+            await Author.findByIdAndUpdate(id, {
+              $push: { genres: genre },
+            });
+            try {
+              await Genre.findByIdAndUpdate(genre, {
+                $push: { genres: id },
+              });
+            } catch (error) {
+              res.status(404).json({
+                error: 'error updating genre',
+                message: error.message,
+              }) && next(error);
+            }
+          } catch (error) {
+            res.status(404).json({
+              error: 'error updating author',
+              message: error.message,
+            }) && next(error);
+          }
+        }
+      })
+    ).then(async () => {
+      return res.status(200).json({
+        dataUpdate: await Author.findById(id).populate('genres'),
+      });
+    });
+  } else {
+    return next(
+      setError(500, error.message || 'General error to update')
+    );
+  }
+};
 
 
 
@@ -325,35 +390,50 @@ const toggleBooks = async (req, res, next) => {
 //?---------------------------------------------------------------------------------
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
-
 const deleteAuthor = async (req, res) => {
+
   try {
     const { id } = req.params;
-    const author = await Author.findByIdAndDelete(id);
-    deleteImgCloudinary(req.file?.path)
+    await Author.findByIdAndDelete(id);
 
-    if (author) {
-      //lo ha borrado, pero ahora vamos a hacer el TESTING--- EXISTE?
-      const findByIdAuthor = await Author.findById(id);
-      // si existe... ERROR ---- hay que borrar los libros de dentro
-      try {
-        const test = await Book.updateMany(
+    try {
+        await Book.updateMany(
           { authors: id },
           { $pull: { authors: id } }
-        );
-        console.log(test);
+        )
+      try {
+          await Genre.updateMany(
+            { books: id },
+            { $pull: { books: id }}
+          )
+          try {
+            await User.updateMany(
+              { favAuthors: id },
+              { $pull: { favAuthors: id } }
+            )
 
-        return res.status(findByIdAuthor ? 404 : 200).json({
-          deleteTest: findByIdAuthor ? false : true,
-        });
+            const authorDeleted = await Author.findById(id)
+              return res.status( authorDeleted ? 404 : 200).json( authorDeleted ? 'error deleting author' : 'this author no longer exists')
+
+            
+          } catch (error) {
+            return res.status(404).json({
+              error: 'error catch updating user',
+              message: error.message,
+            });
+          }
       } catch (error) {
         return res.status(404).json({
-          error: 'no se ha podido borrar',
+          error: 'error catch updating genres',
           message: error.message,
         });
       }
-    } else {
-      return res.status(404).json('este autor no existe');
+
+    } catch (error) {
+      return res.status(404).json({
+        error: 'error catch updating book',
+        message: error.message,
+      });
     }
   } catch (error) {
     return next(
@@ -362,13 +442,15 @@ const deleteAuthor = async (req, res) => {
   }
 };
 
+
 //!---24----- EXPORTAMOS LA FUNCION ENTRE {} (VA A HABER MAS) Y LA IMPORTAMOS EN RUTAS
 module.exports = {
   create,
   getById,
   getAll,
   getByName,
-  deleteAuthor,
   update,
   toggleBooks,
+  toggleGenres,
+  deleteAuthor,
 };

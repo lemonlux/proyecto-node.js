@@ -38,4 +38,32 @@ hay que remplazar esta palabra Bearer por un espacio vacío para que JSON WEB TO
   }
 };
 
-module.exports = { isAuth };
+
+const isAuthAsAdmin = async (req,res,next) =>{
+  //necesitamos el token de igual manera
+  const token = req.headers.authorization?.replace('Bearer ', '')
+  if (!token) {
+    //si no tengo token hay un error y lo voy a mandar del middleware al user
+    return next(new Error('Unauthorized'));
+  }
+
+  try {
+    const decoded = verifyToken(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id);
+
+    if (req.user.rol !== 'admin'){
+      return next(new Error('Not admin, unauthorized'));
+    }
+
+   next()
+
+  } catch (error) {
+    return next(error)
+  }
+}
+
+
+
+
+
+module.exports = { isAuth, isAuthAsAdmin };

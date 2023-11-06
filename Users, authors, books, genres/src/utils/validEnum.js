@@ -20,20 +20,7 @@ const validEnumLanguage = (language) => {
 
 const validEnumGenre = (genre) =>{
   const enumGenre = [
-    'Poesía',
-    'Teatro',
-    'Cuento',
-    'Novela ciencia ficción',
-    'Novela romántica',
-    'Novela policíaca',
-    'Novela fantasía',
-    'Novela intimista',
-    'Novela ilustrada',
-    'Novela histórica',
-    'Ensayo',
-    'Biografía',
-    'Ciencia/Divulgación',
-    'Cómic'
+    'Narrativo', 'Didáctico', 'Dramático/Teatral', 'Lírico', 'Poético'
   ]
   if (enumGenre.includes(genre)){
     return true

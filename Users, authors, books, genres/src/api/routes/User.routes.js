@@ -1,6 +1,6 @@
 //*--------------------- MIDDLEWARE ----------------------------
 const { upload } = require('../../middleware/files.middleware')
-const { isAuth } = require('../../middleware/auth.middleware')
+const { isAuth, isAuthAsAdmin  } = require('../../middleware/auth.middleware')
 
 //*--------------------- CONTROLLERS ----------------------------
 

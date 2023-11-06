@@ -3,24 +3,19 @@ const Schema = mongoose.Schema;
 
 const GenreSchema = new Schema(
   {
-    type: {
+    genre: {
       type: String,
       enum: [
-        'Poesía',
-        'Teatro',
-        'Cuento',
-        'Novela ciencia ficción',
-        'Novela romántica',
-        'Novela policíaca',
-        'Novela fantasía',
-        'Novela intimista',
-        'Novela ilustrada',
-        'Novela histórica',
-        'Ensayo',
-        'Biografía',
-        'Ciencia/Divulgación',
-        'Cómic'
+        'Narrativo', 'Didáctico', 'Dramático/Teatral', 'Lírico', 'Poético'
       ],
+      required: true
+    },
+    subgenre: {
+      type: String,
+      required: true
+    },
+    description: {
+      type: String,
     },
     books: [
         {
