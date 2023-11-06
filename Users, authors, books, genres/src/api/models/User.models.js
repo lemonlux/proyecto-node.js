@@ -47,6 +47,7 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
     favBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }],
+    readBooks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Book' }],
     favAuthors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Author' }],
     favGenres: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Genre' }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],

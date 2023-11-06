@@ -21,6 +21,7 @@ const {
   deleteUser,
   updateUser,
   addFavouriteBook,
+  addReadBook,
   addFavouriteAuthor,
   addFavouriteGenre
 } = require('../controllers/User.controllers');
@@ -63,6 +64,7 @@ UserRoutes.patch(
   updateUser
 );
 UserRoutes.patch('/addBook/:idBook', [isAuth], addFavouriteBook)
+UserRoutes.patch('/addReading/:idBook', [isAuth], addReadBook)
 UserRoutes.patch('/addAuthor/:idAuthor', [isAuth], addFavouriteAuthor)
 UserRoutes.patch('/addGenre/:idGenre', [isAuth], addFavouriteGenre)
 //el middleware NUESTRO (personalizado) se mete entre corchetes. podemos meter varios pero el orden importa
