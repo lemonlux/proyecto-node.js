@@ -167,8 +167,8 @@ const getAuthorsAtoZ = async (req,res,next) =>{
   }
 
   //?---------------------------------------------------------------------------------
-//! ------------------------------- SORT BY LANGUAGE ------------------------------------
-//?---------------------------------------------------------------------------------
+//! ------------------------------- SORT BY LANGUAGE ---------------------------------
+//?-----------------------------------------------------------------------------------
 
 const getAuthorsByLanguage = async (req,res,next) =>{
   try {
@@ -182,8 +182,11 @@ console.log(languageOk)
       let arrAuthors = []
       Promise.all(
         allAuthors.map(async (author)=>{
-          const validLanguageModel = normalizeFunction(author.language)
-          if (validLanguageModel === validLanguage) {
+          const authorValidLanguage = normalizeFunction(author.language)
+          console.log(validLanguage)
+          console.log('aqui va', authorValidLanguage)
+          // if (authorValidLanguage.startsWith(validLanguage)) {
+            if(authorValidLanguage === validLanguage){
              arrAuthors.push(author)
              console.log(author)
           }
