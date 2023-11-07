@@ -17,8 +17,6 @@ const Genre = require('../models/Genre.model');
 //?------------------------- helpers ------------------------------
  
 const setError = require('../../helpers/handleError');
-const { callbackPromise } = require('nodemailer/lib/shared');
-const { Promise } = require('mongoose');
 
 
 
@@ -364,6 +362,7 @@ const getBooksMoreLiked = async (req,res,next) =>{
 //! --------------------------- TOGGLE AUTORES -------------------------------------
 //?-------------------------------- update -----------------------------------------
 
+
 //dentro de cada book hay un array en el que se pueden meter autores ocn un toggle
 
 const toggleAuthors = async (req, res, next) => {
@@ -372,7 +371,7 @@ const toggleAuthors = async (req, res, next) => {
   const { authors } = req.body; //esto crea un string separado por comas de los autores
   const bookById = await Book.findById(id);
   if (bookById) {
-    const arrayIdAuthors = authors.split(',');
+    const arrayIdAuthors = authors.split(',')
     //recorremos el array creado con un mapeo y dentro de una promesa para manejar asincronías
     // console.log(bookById);
     Promise.all(
@@ -388,13 +387,13 @@ const toggleAuthors = async (req, res, next) => {
                 $pull: { books: id },
               });
             } catch (error) {
-              res.status(404).json({
+              return res.status(404).json({
                 error: 'error al actualizar el escritor',
                 message: error.message,
               }) && next(error);
             }
           } catch (error) {
-            res.status(404).json({
+            return res.status(404).json({
               error: 'error al actualizar el libro',
               message: error.message,
             }) && next(error);
@@ -409,13 +408,13 @@ const toggleAuthors = async (req, res, next) => {
                 $push: { books: id },
               });
             } catch (error) {
-              res.status(404).json({
+             return res.status(404).json({
                 error: 'error al actualizar el escritor',
                 message: error.message,
               }) && next(error);
             }
           } catch (error) {
-            res.status(404).json({
+            return res.status(404).json({
               error: 'error al actualizar el libro',
               message: error.message,
             }) && next(error);
