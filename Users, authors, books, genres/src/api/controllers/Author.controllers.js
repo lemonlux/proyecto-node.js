@@ -8,6 +8,7 @@ const Genre = require('../models/Genre.model');
 
 //?------------------------- utils -------------------------------
 const { validEnumGender, validEnumLanguage } = require('../../utils/validEnum')
+const normalizeFunction = require('../../utils/normalize')
 
 //?----------------------- middleware -----------------------------
 const { deleteImgCloudinary } = require('../../middleware/files.middleware');
@@ -129,6 +130,123 @@ const getByName = async (req, res) => {
     });
   }
 };
+
+//?---------------------------------------------------------------------------------
+//! ------------------------------- SORT BY A-Z ------------------------------------
+//?---------------------------------------------------------------------------------
+
+const getAuthorsAtoZ = async (req,res,next) =>{
+  try {
+    const allAuthors = await Author.find()
+    if(allAuthors.length > 0){
+  
+      allAuthors.sort((a,b)=>{
+        if (a.name > b.name) {
+          return 1;
+        }
+        if (a.name < b.name) {
+          return -1;
+        }
+        return 0;
+      });
+      console.log(allAuthors)
+  
+       return res.status(200).json({
+        allAuthors
+       })
+  
+     }else{
+       return res.status(404).json('no se han encontrado libros')
+     }
+  
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to find')
+    );
+  }
+  }
+
+  //?---------------------------------------------------------------------------------
+//! ------------------------------- SORT BY LANGUAGE ------------------------------------
+//?---------------------------------------------------------------------------------
+
+const getAuthorsByLanguage = async (req,res,next) =>{
+  try {
+    const { language } = req.body
+     const validLanguage = normalizeFunction(language.trim().toLowerCase().toString())
+
+    const allAuthors = await Author.find()
+    const languageOk = validEnumLanguage(validLanguage)
+console.log(languageOk)
+    if(languageOk){
+      let arrAuthors = []
+      Promise.all(
+        allAuthors.map(async (author)=>{
+          const validLanguageModel = normalizeFunction(author.language)
+          if (validLanguageModel === validLanguage) {
+             arrAuthors.push(author)
+             console.log(author)
+          }
+        })
+      ).then( async () =>{
+        if(arrAuthors.length > 0){
+          arrAuthors.sort((a,b)=>{
+            if (a.name > b.name) {
+              return 1;
+            }
+            if (a.name < b.name) {
+              return -1;
+            }
+            return 0;
+          });
+        }
+        console.log(arrAuthors)
+        return res.status(200).json(arrAuthors)
+      })
+   
+     }else{
+       return res.status(404).json('error en la busqueda')
+     }
+  
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to find')
+    );
+  }
+  }
+
+//?---------------------------------------------------------------------------------
+//! ---------------------------- GET LIKED AUTHORS ---------------------------------
+//?---------------------------------------------------------------------------------
+
+const bookPublished = async (req,res,next) =>{
+  try {
+    const { id } = req.params;
+    const author = await Author.findById(id)
+    if(author){
+      let publishedArr = []
+      const booksPublished = author.books
+  
+      Promise.all(
+        booksPublished.map(async (booksId)=>{
+          console.log('entro')
+          try {
+            const book = await Book.findById(booksId)
+            publishedArr.push(book.name)
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado')
+          }
+        }),
+      ).then( async () =>{
+  return res.status(200).json(publishedArr)
+      })
+    }else{
+      return res.status(404).json('author not found')
+      }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error finding published books'));
+  }
+  }
 
 
 //*    ----------------------------------------------------------------------------------
@@ -454,8 +572,11 @@ module.exports = {
   getById,
   getAll,
   getByName,
+  getAuthorsAtoZ,
+  bookPublished,
   update,
   toggleBooks,
   toggleGenres,
+  getAuthorsByLanguage,
   deleteAuthor,
 };

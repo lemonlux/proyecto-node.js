@@ -1,3 +1,7 @@
+const normalizeFunction = require('../utils/normalize')
+
+
+
 const validEnumGender = (gender) => {
   console.log('hola');
   const enumGender = ['hombre', 'mujer', 'no binario'];
@@ -11,7 +15,9 @@ const validEnumGender = (gender) => {
 
 const validEnumLanguage = (language) => {
   const enumLanguage = ['español', 'inglés', 'francés', 'alemán', 'italiano', 'portugués']
-  if (enumLanguage.includes(language)){
+  const enumStringNormalize = normalizeFunction(enumLanguage.toString())
+  const arrayLanguageNormalized = enumStringNormalize.split(',')
+  if (arrayLanguageNormalized.includes(language)){
     return true
   }else{
     return false

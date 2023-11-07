@@ -5,10 +5,13 @@ const {
   getById,
   getAll,
   getByName,
+  getAuthorsAtoZ,
   deleteAuthor,
+  bookPublished,
   update,
   toggleBooks,
   toggleGenres,
+  getAuthorsByLanguage,
 } = require('../controllers/Author.controllers');
 const Author = require('../models/Author.model');
 const { isAuth, isAuthAsAdmin } = require('../../middleware/auth.middleware')
@@ -27,6 +30,9 @@ const AuthorRoutes = require('express').Router();
 AuthorRoutes.get('/:id', getById);
 AuthorRoutes.get('/', getAll);
 AuthorRoutes.get('/byName/:name', getByName);
+AuthorRoutes.get('/sort/sortAtoZ/', getAuthorsAtoZ)
+AuthorRoutes.get('/publishedBooks/:id', bookPublished)
+AuthorRoutes.get('/sort/sortByGenre/', getAuthorsByLanguage)
 
 
 //!--------- CON AUTH DE ADMIN---------------------
