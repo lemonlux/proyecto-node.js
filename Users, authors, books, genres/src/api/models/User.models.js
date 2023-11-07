@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
       unique: true,
     },
+    name: {
+      type: String,
+      trim: true,
+    },
     password: {
       type: String,
       required: true,
@@ -51,7 +55,7 @@ const userSchema = new mongoose.Schema(
     favAuthors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Author' }],
     favGenres: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Genre' }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    followed: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
   },
   {
     timestamps: true,
