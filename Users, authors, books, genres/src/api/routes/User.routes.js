@@ -25,7 +25,9 @@ const {
   addReadBook,
   addFavouriteAuthor,
   addFavouriteGenre,
-  followUser
+  followUser,
+  userLikedAuthors,
+  userLikes
 } = require('../controllers/User.controllers');
 
 //*--------------------- ROUTER ----------------------------
@@ -58,6 +60,10 @@ UserRoutes.get('/findByEmail/find', userByEmail);
 UserRoutes.get('/readBooks/:id', getReadBooks)
 
 //!---------- controladores autenticados
+// UserRoutes.get('/getLikes/authors', [isAuth], userLikedAuthors)
+UserRoutes.get('/getLikes/:element', [isAuth], userLikes)
+
+
 UserRoutes.patch('/modifyPassword', [isAuth], modifyPassword);
 UserRoutes.delete('/', [isAuth], deleteUser);
 UserRoutes.patch(
@@ -71,6 +77,7 @@ UserRoutes.patch('/addReading/:idBook', [isAuth], addReadBook)
 UserRoutes.patch('/addAuthor/:idAuthor', [isAuth], addFavouriteAuthor)
 UserRoutes.patch('/addGenre/:idGenre', [isAuth], addFavouriteGenre)
 UserRoutes.patch('/follow/:idUser', [isAuth], followUser)
+
 //el middleware NUESTRO (personalizado) se mete entre corchetes. podemos meter varios pero el orden importa
 
 //!---------- controladores de redirect

@@ -105,9 +105,7 @@ if(userById){
       } catch (error) {
         return res.status(404).json('no se ha encontrado')
       }
-     
     })
-  
   ).then( async () =>{
     return res.status(200).json(booksArray)
   })
@@ -117,24 +115,12 @@ if(userById){
   return res.status(404).json('user not found')
 }
 
-
-
 } catch (error) {
-  return next(setError(500, error.message || 'Error finding authors'));
+  return next(setError(500, error.message || 'Error finding read books'));
 }
 
 
-
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -745,11 +731,18 @@ const sendNewPassword = async (req, res, next) => {
   }
 };
 
+
+
 //*-----------------------------------------------------------------------------------------
-//*-----------------------------------------------------------------------------------------
+//todo--------------------------------------------------------------------------------------
+//todo--------------------------------------------------------------------------------------
 //!-------------------------- controladores con AUTENTICACIÓN ------------------------------
+//todo--------------------------------------------------------------------------------------
+//todo--------------------------------------------------------------------------------------
 //*-----------------------------------------------------------------------------------------
-//*-----------------------------------------------------------------------------------------
+
+
+
 
 //?---------------------------------------------------------------------------------
 //! -------------------------- CAMBIO DE CONTRASEÑA --------------------------------
@@ -917,7 +910,7 @@ const updateUser = async (req, res) => {
 };
 
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOURITE BOOK ----------------------------------- 
+//! -------------------------- ADD FAVOURITE BOOK ----------------------------------- 
 //?---------------------------------------------------------------------------------
 //vamos a sacar el book por los params y la info del usuario (fav Books, id) por el token-- req.user
 
@@ -1004,7 +997,7 @@ const addFavouriteBook = async (req, res, next) => {
 
 
 //?---------------------------------------------------------------------------------
-//! -------------------------------- READ BOOK -------------------------------------
+//! ----------------------------- ADD READ BOOK ------------------------------------
 //?---------------------------------------------------------------------------------
 
 
@@ -1091,7 +1084,7 @@ const addReadBook = async (req, res, next) => {
 
 
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOURITE AUTHOR ---------------------------------
+//! ------------------------- ADD FAVOURITE AUTHOR ---------------------------------
 //?---------------------------------------------------------------------------------
 
 const addFavouriteAuthor = async (req,res,next) =>{
@@ -1180,7 +1173,7 @@ try {
 
 
 //?---------------------------------------------------------------------------------
-//! ----------------------------- FAVOURITE GENRE ----------------------------------
+//! --------------------------- ADD FAVOURITE GENRE --------------------------------
 //?---------------------------------------------------------------------------------
 
 
@@ -1340,6 +1333,138 @@ const followUser = async (req,res,next) =>{
 }
 
 
+//?---------------------------------------------------------------------------------
+//! ---------------------------- GET LIKED AUTHORS ---------------------------------
+//?---------------------------------------------------------------------------------
+
+const userLikedAuthors = async (req,res,next) =>{
+
+  const { _id, favAuthors } = req.user
+  try {
+    const user = await User.findById(_id)
+    console.log(favAuthors)
+  
+    if(user){
+      let likesArr = []
+  
+      Promise.all(
+        favAuthors.map(async (authorId)=>{
+          console.log('entro')
+          try {
+            const author = await Author.findById(authorId)
+            likesArr.push(author.name)
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado')
+          }
+        }),
+      ).then( async () =>{
+  return res.status(200).json(likesArr)
+      })
+    }else{
+      return res.status(404).json('user not found')
+      }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error finding liked authors'));
+  }
+  }
+  
+//?---------------------------------------------------------------------------------
+//! ---------------------------- GET LIKED BOOKS ---------------------------------
+//?---------------------------------------------------------------------------------
+
+const userLikedBooks = async (req,res,next) =>{
+
+  const { _id, favBooks } = req.user
+  try {
+    const user = await User.findById(_id)
+    console.log(favBooks)
+  
+    if(user){
+      let likesArr = []
+  
+      Promise.all(
+        favBooks.map(async (bookId)=>{
+          console.log('entro')
+          try {
+            const book = await Book.findById(bookId)
+            likesArr.push(book.name)
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado')
+          }
+        }),
+      ).then( async () =>{
+  return res.status(200).json(likesArr)
+      })
+    }else{
+      return res.status(404).json('user not found')
+      }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error finding liked authors'));
+  }
+  }
+
+//?---------------------------------------------------------------------------------
+//! ----------------------------- GET LIKES SWITCH ---------------------------------
+//?---------------------------------------------------------------------------------
+
+
+
+  const likes = async (favItem, mongooseItem, res, name) =>{
+    let likesArr = []
+    
+    Promise.all(
+      favItem.map(async (itemId)=>{
+        try {
+          console.log('entro aqui', favItem)
+          const item = await mongooseItem.findById(itemId)
+          item.name ?  likesArr.push(item.name) : likesArr.push(item.subgenre)
+          console.log(item)
+        } catch (error) {
+          return res.status(404).json('no se ha encontrado')
+        }
+      }),
+    ).then( async () =>{
+return res.status(200).json(likesArr)
+    })
+  }
+  
+
+  const userLikes = async (req,res,next) =>{
+
+    const { element } = req.params
+    const { _id, favAuthors, favBooks, favGenres } = req.user
+
+    try {
+      const user = await User.findById(_id)
+
+      if(!user){
+        return res.status(404).json('user not found')
+      }
+
+      switch (element) {
+        case "authors":
+          likes(favAuthors, Author, res)
+          break;
+      
+          case "books":
+
+            likes(favBooks, Book, res)
+          break;
+  
+          case "genres":
+            likes(favGenres, Genre, res)
+          break;
+      
+      
+      }
+    } catch (error) {
+       return next(setError(500, error.message || 'Error finding likes'));
+    }
+
+  }
+
+
+
 
 
 
@@ -1423,5 +1548,7 @@ module.exports = {
   addReadBook,
   addFavouriteAuthor,
   addFavouriteGenre,
-  followUser
+  followUser,
+  userLikedAuthors,
+  userLikes
 };
