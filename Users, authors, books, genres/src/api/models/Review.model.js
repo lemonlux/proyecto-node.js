@@ -5,7 +5,7 @@ const Schema = mongoose.Schema
 const ReviewSchema = new Schema(
     {
         rating: {
-            enum: [ 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
+            enum: [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5],
             required: true,
             type: Number,
         },

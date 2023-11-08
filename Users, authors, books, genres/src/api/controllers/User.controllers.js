@@ -1436,6 +1436,14 @@ const deleteUser = async (req, res) => {
                     { followers: req.user?._id },
                     { $pull: { followers: req.user?._id } }
                   );
+
+                      //lo buscamos pa ver si se ha borrado correctamente
+                      const userTest = await User.findById(req.user?._id);
+                      return res
+                        .status(userTest ? 404 : 200)
+                        .json({ deleteTest: userTest ? false : true });
+
+
                 } catch (error) {
                   return res.status(404).json({
                     error: 'error catch updating users',

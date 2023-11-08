@@ -35,10 +35,17 @@ const validEnumGenre = (genre) =>{
   }
 }
 
+const validEnumRating = (rating) =>{
+  const enumRating = [ 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+  if (enumRating.includes(rating)){
+    return true
+  }else{
+    return false
+  }
+}
 
 
-
-module.exports = { validEnumGender, validEnumLanguage, validEnumGenre };
+module.exports = { validEnumGender, validEnumLanguage, validEnumGenre, validEnumRating };
 
 
 
