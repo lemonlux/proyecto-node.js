@@ -116,15 +116,12 @@ const getAuthorsByBook = async (req, res, next) => {
     const bookById = await Book.findById(id);
 
     if (!bookById) {
-      return res.status(404).json({
-        error: 'Book not found',
-        message: error.message,
-      });
+      return res.status(404).json('Book not found');
     }
     
     const authorIds = bookById.authors;
     console.log(authorIds)
-    const authorNames = [];
+    const authors = [];
 
     for (let id of authorIds) {
       const author = await Author.findById(id);
@@ -136,15 +133,15 @@ const getAuthorsByBook = async (req, res, next) => {
         });
       }
 
-      authorNames.push(author.name);
+      authors.push(author);
     }
 
-    if (authorNames.length > 0) {
-      return res.status(200).json(authorNames);
+    if (authors.length > 0) {
+      return res.status(200).json(authors);
     } else {
       return res.status(404).json({
         error: 'No authors found for the book',
-        message: 'No authors found for the book',
+        message: error.message,
       });
     }
   } catch (error) {
@@ -154,81 +151,6 @@ const getAuthorsByBook = async (req, res, next) => {
 
 
 
-// const getAuthorsByBook = async (req,res,next) =>{
-// console.log('entro')
-//  try {
-//   // const idAuthors = []
-//   const { id } = req.params
-//   const bookById = await Book.findById(id)
-
-//   if(bookById){
-
-//     try {
-//       let authorNames = [];
-    
-//       Promise.all(
-
-
-//         bookById.authors.forEach( async (id) =>{
-//           // console.log(id)
-//           try {
-//             const author = await Author.findById(id)
-//             const authorName = author.name
-//             console.log(authorName)
-//             authorNames.push(authorName)
-//             console.log(authorNames)
-
-//           } catch (error) {
-//             return res.status(404).json('no se ha encontrado')
-//           }
-//           // const author = await Author.findById(id)
-//           // console.log(author, author.name)
-        
-     
-//         })
-
-//       ).then( async () =>{
-//         console.log('autores', authorNames)
-//       return res.status(200).json(authorNames)
-
-//       })
-//       // bookById.authors.forEach( async (id) =>{
-//       //   // console.log(id)
-//       //   const author = await Author.findById(id)
-//       //   // console.log(author, author.name)
-      
-//       //   const authorName = author.name
-//       //   console.log(authorName)
-//       //   authorNames.push(authorName)
-//       //   console.log(authorNames)
-//       // })
-
-//       // console.log('authores', authorNames)
-//       // return res.status(200).json(authorNames)
-  
-//     } catch (error) {
-//       return res.status(404).json({
-//         error: 'authors not found',
-//         message: error.message,
-//       });
-//     }
-
-//   }else{
-//     return res.status(404).json({
-//           error: 'book not found',
-//           message: error.message,
-//         });
-//   }
-
-//  } catch (error) {
-//    return next(
-//       setError(500, error.message || 'Error to find')
-//     );
-//  }
-
-
-
-// }
 
 //?---------------------------------------------------------------------------------
 //! --------------------- SORT BY PAGES: SHORTEST TO LONGEST -----------------------
@@ -453,7 +375,7 @@ const toggleGenres = async (req, res, next) => {
               $pull: { genres: genre },
             });
             try {
-              await Author.findByIdAndUpdate(genre, {
+              await Genre.findByIdAndUpdate(genre, {
                 $pull: { books: id },
               });
             } catch (error) {
@@ -474,7 +396,7 @@ const toggleGenres = async (req, res, next) => {
               $push: { genres: genre },
             });
             try {
-              await Author.findByIdAndUpdate(genre, {
+              await Genre.findByIdAndUpdate(genre, {
                 $push: { books: id },
               });
             } catch (error) {

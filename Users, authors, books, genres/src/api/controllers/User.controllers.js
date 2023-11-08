@@ -1352,7 +1352,7 @@ const userLikedAuthors = async (req,res,next) =>{
           console.log('entro')
           try {
             const author = await Author.findById(authorId)
-            likesArr.push(author.name)
+            likesArr.push(author)
           } catch (error) {
             return res.status(404).json('no se ha encontrado')
           }
@@ -1426,8 +1426,6 @@ return res.status(200).json(likesArr)
     }
 
   }
-
-
 
 
 

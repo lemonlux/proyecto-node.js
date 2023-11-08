@@ -3,6 +3,8 @@ const {
   getGenreById,
   getAllGenres,
   getGenreByName,
+  getGenressAtoZ,
+  bookByGenre,
   updateGenre,
   deleteGenre,
   toggleAuthors,
@@ -17,6 +19,8 @@ const GenreRoutes = require('express').Router();
 GenreRoutes.get('/:id', getGenreById);
 GenreRoutes.get('/', getAllGenres);
 GenreRoutes.get('/getByType/:type', getGenreByName);
+GenreRoutes.get('/sort/sortAtoZ/', getGenressAtoZ)
+GenreRoutes.get('/getBooks/:id', bookByGenre)
 
 //!--------- CON AUTH DE ADMIN---------------------
 GenreRoutes.post('/', [isAuthAsAdmin], createGenre);

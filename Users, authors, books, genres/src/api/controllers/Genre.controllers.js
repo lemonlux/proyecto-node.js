@@ -111,6 +111,85 @@ try {
 
 }
 
+
+
+//?---------------------------------------------------------------------------------
+//! ------------------------------- SORT BY A-Z ------------------------------------
+//?---------------------------------------------------------------------------------
+
+const getGenressAtoZ = async (req,res,next) =>{
+  try {
+    const allGenres = await Genre.find()
+    if(allGenres.length > 0){
+  
+      allGenres.sort((a,b)=>{
+        if (a.subgenre > b.subgenre) {
+          return 1;
+        }
+        if (a.subgenre < b.subgenre) {
+          return -1;
+        }
+        return 0;
+      });
+      console.log(allGenres)
+  
+       return res.status(200).json({
+        allGenres
+       })
+  
+     }else{
+       return res.status(404).json('no se han encontrado generos')
+     }
+  
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to find')
+    );
+  }
+  }
+
+
+//?---------------------------------------------------------------------------------
+//! ---------------------------- GET BOOKS BY GENRE --------------------------------
+//?---------------------------------------------------------------------------------
+
+
+
+  const bookByGenre = async (req,res,next) =>{
+    try {
+      const { id } = req.params;   // ID GENRE
+      const genre = await Genre.findById(id)
+      if(genre){
+        let booksByGenreArr = []
+        const booksByGenre = genre.books
+    
+        Promise.all(
+          booksByGenre.map(async (booksId)=>{
+            console.log('entro')
+            try {
+              const book = await Book.findById(booksId)
+              booksByGenreArr.push(book)
+            } catch (error) {
+              return res.status(404).json('no se ha encontrado')
+            }
+          }),
+        ).then( async () =>{
+    return res.status(200).json(booksByGenreArr)
+        })
+      }else{
+        return res.status(404).json('author not found')
+        }
+    } catch (error) {
+      return next(setError(500, error.message || 'Error finding published books'));
+    }
+    }
+
+
+
+
+
+
+
 //*    ----------------------------------------------------------------------------------
 //todo ------------------------------- CON AUTH -----------------------------------------
 //todo -------------------------------DE ADMIN  -----------------------------------------
@@ -414,6 +493,8 @@ module.exports = {
     getGenreById,
     getAllGenres,
     getGenreByName,
+    getGenressAtoZ,
+    bookByGenre,
     updateGenre,
     toggleAuthors,
     toggleBooks,

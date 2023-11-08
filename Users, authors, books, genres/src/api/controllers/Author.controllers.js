@@ -226,7 +226,7 @@ console.log(languageOk)
 
 
 //?---------------------------------------------------------------------------------
-//! ---------------------------- GET LIKED AUTHORS ---------------------------------
+//! --------------------------- GET PUBLISHED BOOKS --------------------------------
 //?---------------------------------------------------------------------------------
 
 const bookPublished = async (req,res,next) =>{
@@ -242,7 +242,7 @@ const bookPublished = async (req,res,next) =>{
           console.log('entro')
           try {
             const book = await Book.findById(booksId)
-            publishedArr.push(book.name)
+            publishedArr.push(book)
           } catch (error) {
             return res.status(404).json('no se ha encontrado')
           }
@@ -462,7 +462,7 @@ const toggleGenres = async (req, res, next) => {
         if (authorById.genres.includes(genre)) {
           try {
             await Author.findByIdAndUpdate(id, {
-              $pull: { genres: genre },
+              $pull: { genres: subgenre },
             });
             try {
               await Genre.findByIdAndUpdate(genre, {
@@ -483,7 +483,7 @@ const toggleGenres = async (req, res, next) => {
         } else {
           try {
             await Author.findByIdAndUpdate(id, {
-              $push: { genres: genre },
+              $push: { genres: subgenre },
             });
             try {
               await Genre.findByIdAndUpdate(genre, {

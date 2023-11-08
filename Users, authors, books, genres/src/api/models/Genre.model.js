@@ -17,6 +17,12 @@ const GenreSchema = new Schema(
     description: {
       type: String,
     },
+    authors: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Author',
+      },
+    ],
     books: [
         {
           type: mongoose.Schema.Types.ObjectId,
