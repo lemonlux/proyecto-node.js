@@ -1409,18 +1409,16 @@ const userLikedBooks = async (req,res,next) =>{
 
 
 
-  const likes = async (favItem, mongooseItem, res, name) =>{
+  const likes = async (favItem, mongooseItem, res) =>{
     let likesArr = []
     
     Promise.all(
       favItem.map(async (itemId)=>{
         try {
-          console.log('entro aqui', favItem)
           const item = await mongooseItem.findById(itemId)
-          item.name ?  likesArr.push(item.name) : likesArr.push(item.subgenre)
-          console.log(item)
+          likesArr.push(item)
         } catch (error) {
-          return res.status(404).json('no se ha encontrado')
+          return res.status(404).json(error.message)
         }
       }),
     ).then( async () =>{

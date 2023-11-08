@@ -183,8 +183,6 @@ console.log(languageOk)
       Promise.all(
         allAuthors.map(async (author)=>{
           const authorValidLanguage = normalizeFunction(author.language)
-          console.log(validLanguage)
-          console.log('aqui va', authorValidLanguage)
           // if (authorValidLanguage.startsWith(validLanguage)) {
             if(authorValidLanguage === validLanguage){
              arrAuthors.push(author)
@@ -206,17 +204,26 @@ console.log(languageOk)
         console.log(arrAuthors)
         return res.status(200).json(arrAuthors)
       })
-   
+  
      }else{
        return res.status(404).json('error en la busqueda')
      }
-  
   } catch (error) {
     return next(
       setError(500, error.message || 'Error to find')
     );
   }
   }
+
+
+  //?---------------------------------------------------------------------------------
+//! -------------------------------- SEARCH BY NAME ---------------------------------
+//?-----------------------------------------------------------------------------------
+
+
+
+
+
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- GET LIKED AUTHORS ---------------------------------
