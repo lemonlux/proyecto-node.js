@@ -14,6 +14,7 @@ const {
   autoLogin,
   resendCode,
   userById,
+  userByUserName,
   verifyCode,
   changePassword,
   sendNewPassword,
@@ -56,6 +57,7 @@ UserRoutes.patch('/password/setNewPassword', changePassword); //EN LA RUTA PONEM
 //*----- get
 
 UserRoutes.get('/:id', userById);
+UserRoutes.get('/find/findUser', userByUserName)
 UserRoutes.get('/findByEmail/find', userByEmail);
 UserRoutes.get('/readBooks/:id', getReadBooks)
 

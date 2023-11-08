@@ -56,6 +56,8 @@ const userSchema = new mongoose.Schema(
     favGenres: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Genre' }],
     followers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+    likedReviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
   },
   {
     timestamps: true,

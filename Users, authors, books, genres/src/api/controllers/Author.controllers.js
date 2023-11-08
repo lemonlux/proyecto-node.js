@@ -141,10 +141,10 @@ const getAuthorsAtoZ = async (req,res,next) =>{
     if(allAuthors.length > 0){
   
       allAuthors.sort((a,b)=>{
-        if (a.name > b.name) {
+        if (a.lastName > b.lastName) {
           return 1;
         }
-        if (a.name < b.name) {
+        if (a.lastName < b.lastName) {
           return -1;
         }
         return 0;
@@ -290,6 +290,8 @@ const update = async (req, res) => {
         _id: authorById._id,
         image: req.file?.path ? catchImg : oldImg,
         name: req.body?.name ? req.body?.name : authorById.name,
+        lastName: req.body?.lastName ? req.body?.lastName : authorById.lastName,
+        secondLastName: req.body?.secondLastName ? req.body?.secondLastName : authorById.secondLastName,
         yearBorn: req.body?.yearBorn ? req.body?.yearBorn : authorById.yearBorn
       };
 

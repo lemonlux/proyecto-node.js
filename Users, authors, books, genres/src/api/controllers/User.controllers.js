@@ -3,6 +3,7 @@ const User = require('../models/User.models');
 const Book = require('../models/Book.model');
 const Author = require('../models/Author.model');
 const Genre = require('../models/Genre.model');
+const Review = require('../models/Review.model');
 
 //?------------------------- utils --------------------------------
 const randomCode = require('../../utils/randomCode');
@@ -54,8 +55,6 @@ const userById = async (req, res) => {
 
 //* ---------------------- get by email ---------------------------
 
-
-
 const userByEmail = async (req, res) => {
   try {
     const { userEmail } = req.body;
@@ -80,49 +79,66 @@ const userByEmail = async (req, res) => {
   }
 };
 
+//* ---------------------- get by userName ---------------------------
+
+const userByUserName = async (req, res) => {
+  try {
+    const { userName } = req.body;
+    const userByUserName = await User.findOne({ userName });
+
+    if (userByUserName) {
+      return res.status(200).json({
+        userByUserName,
+        message: 'user found',
+      });
+    } else {
+      return res.status(404).json({
+        userByUserName,
+        message: 'user not found',
+      });
+    }
+  } catch (error) {
+    return res.status(404).json({
+      error: 'error en el catch',
+      message: error.message,
+    });
+  }
+};
 
 //?---------------------------------------------------------------------------------
 //! ------------------------------- GET READ BOOKS ---------------------------------
 //?---------------------------------------------------------------------------------
 
-const getReadBooks = async (req,res,next)=>{
-try {
-  const { id } = req.params
-  const userById = await User.findById(id)
+const getReadBooks = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userById = await User.findById(id);
 
-if(userById){
-  let booksArray = []
-  const booksReadIds = userById.readBooks
+    if (userById) {
+      let booksArray = [];
+      const booksReadIds = userById.readBooks;
 
-  Promise.all(
-    booksReadIds.map( async (bookId)=>{
-      try {
-        const book = await Book.findById(bookId)
-        const bookName = book.name
-        console.log(book.name)
-        booksArray.push(bookName)
-  
-      } catch (error) {
-        return res.status(404).json('no se ha encontrado')
-      }
-    })
-  ).then( async () =>{
-    return res.status(200).json(booksArray)
-  })
-
-
-}else{
-  return res.status(404).json('user not found')
-}
-
-} catch (error) {
-  return next(setError(500, error.message || 'Error finding read books'));
-}
-
-
-}
-
-
+      Promise.all(
+        booksReadIds.map(async (bookId) => {
+          try {
+            const book = await Book.findById(bookId);
+            const bookName = book.name;
+            console.log(book.name);
+            booksArray.push(bookName);
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado');
+          }
+        })
+      ).then(async () => {
+        return res.status(200).json(booksArray);
+      });
+    } else {
+      return res.status(404).json('user not found');
+    }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error finding read books'));
+  }
+};
 
 //* ________________________________ POST _________________________________________
 
@@ -210,9 +226,7 @@ const userRegister = async (req, res, next) => {
     }
   } catch (error) {
     req.file?.path && deleteImgCloudinary(catchImg); //!--??
-    return next(
-      setError(500, error.message || 'Error general to register')
-    );
+    return next(setError(500, error.message || 'Error general to register'));
   }
 };
 
@@ -287,9 +301,7 @@ const stateRegister = async (req, res, next) => {
     }
   } catch (error) {
     req.file && deleteImgCloudinary(catchImg);
-    return next(
-      setError(500, error.message || 'Error general to register')
-    );
+    return next(setError(500, error.message || 'Error general to register'));
   }
 };
 
@@ -350,9 +362,7 @@ const redirectRegister = async (req, res, next) => {
   } catch (error) {
     //da feedback al usuario y a nosotros
     req.file && deleteImgCloudinary(catchImg);
-    return next(
-      setError(500, error.message || 'Error general to register')
-    );
+    return next(setError(500, error.message || 'Error general to register'));
   }
 };
 
@@ -403,9 +413,7 @@ const sendCode = async (req, res, next) => {
       }
     });
   } catch (error) {
-    return next(
-      setError(500, error.message || 'General error to send mail')
-    );
+    return next(setError(500, error.message || 'General error to send mail'));
   }
 };
 
@@ -442,9 +450,7 @@ const login = async (req, res) => {
       return res.status(404).json('This user is not registered');
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'General error to login')
-    );
+    return next(setError(500, error.message || 'General error to login'));
   }
 };
 
@@ -477,9 +483,7 @@ const autoLogin = async (req, res) => {
       return res.status(404).json('This user does not exist');
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'General error to auto log')
-    );
+    return next(setError(500, error.message || 'General error to auto log'));
   }
 };
 
@@ -531,9 +535,7 @@ const resendCode = async (req, res) => {
       return res.status(404).json('This user does not exist');
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'Error general to resendCode')
-    );
+    return next(setError(500, error.message || 'Error general to resendCode'));
   }
 };
 
@@ -610,9 +612,7 @@ const verifyCode = async (req, res, next) => {
       return res.status(200).json('This user does not exist');
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'General error to verify code')
-    );
+    return next(setError(500, error.message || 'General error to verify code'));
   }
 };
 
@@ -731,8 +731,6 @@ const sendNewPassword = async (req, res, next) => {
   }
 };
 
-
-
 //*-----------------------------------------------------------------------------------------
 //todo--------------------------------------------------------------------------------------
 //todo--------------------------------------------------------------------------------------
@@ -740,9 +738,6 @@ const sendNewPassword = async (req, res, next) => {
 //todo--------------------------------------------------------------------------------------
 //todo--------------------------------------------------------------------------------------
 //*-----------------------------------------------------------------------------------------
-
-
-
 
 //?---------------------------------------------------------------------------------
 //! -------------------------- CAMBIO DE CONTRASEÑA --------------------------------
@@ -910,7 +905,7 @@ const updateUser = async (req, res) => {
 };
 
 //?---------------------------------------------------------------------------------
-//! -------------------------- ADD FAVOURITE BOOK ----------------------------------- 
+//! -------------------------- ADD FAVOURITE BOOK -----------------------------------
 //?---------------------------------------------------------------------------------
 //vamos a sacar el book por los params y la info del usuario (fav Books, id) por el token-- req.user
 
@@ -934,7 +929,7 @@ const addFavouriteBook = async (req, res, next) => {
           });
 
           //!------- respuesta ------------- dentro de este try si todo ha salido bien
-          const bookUpdated = await Book.findById(idBook)
+          const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
             userUpdated: await User.findById(_id),
@@ -967,7 +962,7 @@ const addFavouriteBook = async (req, res, next) => {
 
           //!------- respuesta ------------- dentro de este try si todo ha salido bien
 
-          const bookUpdated = await Book.findById(idBook)
+          const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
             userUpdated: await User.findById(_id),
@@ -994,21 +989,16 @@ const addFavouriteBook = async (req, res, next) => {
   }
 };
 
-
-
 //?---------------------------------------------------------------------------------
 //! ----------------------------- ADD READ BOOK ------------------------------------
 //?---------------------------------------------------------------------------------
-
 
 const addReadBook = async (req, res, next) => {
   try {
     const { _id, readBooks } = req.user;
     const { idBook } = req.params;
 
-
     if (readBooks.includes(idBook)) {
-
       try {
         await User.findByIdAndUpdate(_id, {
           $pull: { readBooks: idBook },
@@ -1019,8 +1009,8 @@ const addReadBook = async (req, res, next) => {
             $pull: { readings: _id },
           });
 
-          //!------- respuesta ------------- 
-          const bookUpdated = await Book.findById(idBook)
+          //!------- respuesta -------------
+          const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
             userUpdated: await User.findById(_id),
@@ -1053,7 +1043,7 @@ const addReadBook = async (req, res, next) => {
 
           //!------- respuesta ------------- dentro de este try si todo ha salido bien
 
-          const bookUpdated = await Book.findById(idBook)
+          const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
             userUpdated: await User.findById(_id),
@@ -1080,122 +1070,105 @@ const addReadBook = async (req, res, next) => {
   }
 };
 
-
-
-
 //?---------------------------------------------------------------------------------
 //! ------------------------- ADD FAVOURITE AUTHOR ---------------------------------
 //?---------------------------------------------------------------------------------
 
-const addFavouriteAuthor = async (req,res,next) =>{
-try {
-  const { _id, favAuthors } = req.user
-  const { idAuthor } = req.params
+const addFavouriteAuthor = async (req, res, next) => {
+  try {
+    const { _id, favAuthors } = req.user;
+    const { idAuthor } = req.params;
 
-  if(favAuthors.includes(idAuthor)){
-    try {
-      await User.findByIdAndUpdate(_id, {
-        $pull: { favAuthors: idAuthor },
-      });
-
+    if (favAuthors.includes(idAuthor)) {
       try {
-        await Author.findByIdAndUpdate(idAuthor, {
-          $pull: { likes: _id },
+        await User.findByIdAndUpdate(_id, {
+          $pull: { favAuthors: idAuthor },
         });
 
-        
-        const authorUpdated = await Author.findById(idAuthor)
+        try {
+          await Author.findByIdAndUpdate(idAuthor, {
+            $pull: { likes: _id },
+          });
 
-        return res.status(200).json({
-          userUpdated: await User.findById(_id),
-          authorUpdated,
-          update: `pulled ${authorUpdated.name} from User's likes`,
-        });
+          const authorUpdated = await Author.findById(idAuthor);
+
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            authorUpdated,
+            update: `pulled ${authorUpdated.name} from User's likes`,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch pull user',
+            message: error.message,
+          });
+        }
       } catch (error) {
         return res.status(404).json({
-          error: 'error en el catch pull user',
+          error: 'error en el catch pull author',
           message: error.message,
         });
       }
-    } catch (error) {
-      return res.status(404).json({
-        error: 'error en el catch pull author',
-        message: error.message,
-      });
-    }
-
-  }else{
-    try {
-      await User.findByIdAndUpdate(_id, {
-        $push: { favAuthors: idAuthor },
-      });
-
+    } else {
       try {
-        await Author.findByIdAndUpdate(idAuthor, {
-          $push: { likes: _id },
+        await User.findByIdAndUpdate(_id, {
+          $push: { favAuthors: idAuthor },
         });
 
-        
-        const authorUpdated = await Author.findById(idAuthor)
+        try {
+          await Author.findByIdAndUpdate(idAuthor, {
+            $push: { likes: _id },
+          });
 
-        return res.status(200).json({
-          userUpdated: await User.findById(_id),
-          authorUpdated,
-          update: `pushed ${authorUpdated.name} to User's likes`,
-        });
+          const authorUpdated = await Author.findById(idAuthor);
+
+          return res.status(200).json({
+            userUpdated: await User.findById(_id),
+            authorUpdated,
+            update: `pushed ${authorUpdated.name} to User's likes`,
+          });
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error en el catch push user',
+            message: error.message,
+          });
+        }
       } catch (error) {
         return res.status(404).json({
-          error: 'error en el catch push user',
+          error: 'error en el catch push author',
           message: error.message,
         });
       }
-    } catch (error) {
-      return res.status(404).json({
-        error: 'error en el catch push author',
-        message: error.message,
-      });
     }
-
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error to add favourite author')
+    );
   }
-
-
-
-
-} catch (error) {
-  return next(
-    setError(500, error.message || 'Error to add favourite author')
-  );
-}
-
-}
-
-
-
+};
 
 //?---------------------------------------------------------------------------------
 //! --------------------------- ADD FAVOURITE GENRE --------------------------------
 //?---------------------------------------------------------------------------------
 
-
-const addFavouriteGenre = async (req,res,next) =>{
+const addFavouriteGenre = async (req, res, next) => {
   try {
-    const { _id, favGenres } = req.user
-    const { idGenre } = req.params
+    const { _id, favGenres } = req.user;
+    const { idGenre } = req.params;
 
-    if(favGenres.includes(idGenre)){
+    if (favGenres.includes(idGenre)) {
       try {
         await User.findByIdAndUpdate(_id, {
           $pull: { favGenres: idGenre },
         });
-  
+
         try {
           await Genre.findByIdAndUpdate(idGenre, {
             $pull: { likes: _id },
           });
-  
-          
-          const genreUpdated = await Genre.findById(idGenre)
-  
+
+          const genreUpdated = await Genre.findById(idGenre);
+
           return res.status(200).json({
             userUpdated: await User.findById(_id),
             genreUpdated,
@@ -1213,19 +1186,19 @@ const addFavouriteGenre = async (req,res,next) =>{
           message: error.message,
         });
       }
-    }else{
+    } else {
       try {
         await User.findByIdAndUpdate(_id, {
           $push: { favGenres: idGenre },
         });
-  
+
         try {
           await Genre.findByIdAndUpdate(idGenre, {
             $push: { likes: _id },
           });
-  
-          const genreUpdated = await Genre.findById(idGenre)
-  
+
+          const genreUpdated = await Genre.findById(idGenre);
+
           return res.status(200).json({
             userUpdated: await User.findById(_id),
             genreUpdated,
@@ -1244,38 +1217,33 @@ const addFavouriteGenre = async (req,res,next) =>{
         });
       }
     }
-  
   } catch (error) {
-    return next(
-      setError(500, error.message || 'Error to add favourite genre')
-    );
+    return next(setError(500, error.message || 'Error to add favourite genre'));
   }
-  
-
-}
+};
 
 //?---------------------------------------------------------------------------------
 //! ------------------------------- FOLLOW USER ------------------------------------
 //?---------------------------------------------------------------------------------
 
-const followUser = async (req,res,next) =>{
+const followUser = async (req, res, next) => {
   try {
-    const { _id, following } = req.user
-    const { idUser } = req.params
+    const { _id, following } = req.user;
+    const { idUser } = req.params;
 
-    if(following.includes(idUser)){
+    if (following.includes(idUser)) {
       try {
         await User.findByIdAndUpdate(_id, {
           $pull: { following: idUser },
         });
-  
+
         try {
           await User.findByIdAndUpdate(idUser, {
             $pull: { followers: _id },
           });
-  
-          const userFollowed = await User.findById(idUser)
-  
+
+          const userFollowed = await User.findById(idUser);
+
           return res.status(200).json({
             userUpdated: await User.findById(_id),
             userFollowed,
@@ -1293,19 +1261,19 @@ const followUser = async (req,res,next) =>{
           message: error.message,
         });
       }
-    }else{
+    } else {
       try {
         await User.findByIdAndUpdate(_id, {
           $push: { following: idUser },
         });
-  
+
         try {
           await User.findByIdAndUpdate(idUser, {
             $push: { followers: _id },
           });
-  
-          const userFollowed = await User.findById(idUser)
-  
+
+          const userFollowed = await User.findById(idUser);
+
           return res.status(200).json({
             userUpdated: await User.findById(_id),
             userFollowed,
@@ -1324,111 +1292,94 @@ const followUser = async (req,res,next) =>{
         });
       }
     }
-  
   } catch (error) {
-    return next(
-      setError(500, error.message || 'Error to add favourite genre')
-    );
+    return next(setError(500, error.message || 'Error to add favourite genre'));
   }
-}
-
+};
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- GET LIKED AUTHORS ---------------------------------
 //?---------------------------------------------------------------------------------
 
-const userLikedAuthors = async (req,res,next) =>{
-
-  const { _id, favAuthors } = req.user
+const userLikedAuthors = async (req, res, next) => {
+  const { _id, favAuthors } = req.user;
   try {
-    const user = await User.findById(_id)
-    console.log(favAuthors)
-  
-    if(user){
-      let likesArr = []
-  
+    const user = await User.findById(_id);
+    console.log(favAuthors);
+
+    if (user) {
+      let likesArr = [];
+
       Promise.all(
-        favAuthors.map(async (authorId)=>{
-          console.log('entro')
+        favAuthors.map(async (authorId) => {
+          console.log('entro');
           try {
-            const author = await Author.findById(authorId)
-            likesArr.push(author)
+            const author = await Author.findById(authorId);
+            likesArr.push(author);
           } catch (error) {
-            return res.status(404).json('no se ha encontrado')
+            return res.status(404).json('no se ha encontrado');
           }
-        }),
-      ).then( async () =>{
-  return res.status(200).json(likesArr)
-      })
-    }else{
-      return res.status(404).json('user not found')
-      }
+        })
+      ).then(async () => {
+        return res.status(200).json(likesArr);
+      });
+    } else {
+      return res.status(404).json('user not found');
+    }
   } catch (error) {
     return next(setError(500, error.message || 'Error finding liked authors'));
   }
-  }
-  
+};
 
 //?---------------------------------------------------------------------------------
 //! ----------------------------- GET LIKES SWITCH ---------------------------------
 //?---------------------------------------------------------------------------------
 
+const likes = async (favItem, mongooseItem, res) => {
+  let likesArr = [];
 
-
-  const likes = async (favItem, mongooseItem, res) =>{
-    let likesArr = []
-    
-    Promise.all(
-      favItem.map(async (itemId)=>{
-        try {
-          const item = await mongooseItem.findById(itemId)
-          likesArr.push(item)
-        } catch (error) {
-          return res.status(404).json(error.message)
-        }
-      }),
-    ).then( async () =>{
-return res.status(200).json(likesArr)
+  Promise.all(
+    favItem.map(async (itemId) => {
+      try {
+        const item = await mongooseItem.findById(itemId);
+        likesArr.push(item);
+      } catch (error) {
+        return res.status(404).json(error.message);
+      }
     })
-  }
-  
+  ).then(async () => {
+    return res.status(200).json(likesArr);
+  });
+};
 
-  const userLikes = async (req,res,next) =>{
+const userLikes = async (req, res, next) => {
+  const { element } = req.params;
+  const { _id, favAuthors, favBooks, favGenres } = req.user;
 
-    const { element } = req.params
-    const { _id, favAuthors, favBooks, favGenres } = req.user
+  try {
+    const user = await User.findById(_id);
 
-    try {
-      const user = await User.findById(_id)
-
-      if(!user){
-        return res.status(404).json('user not found')
-      }
-
-      switch (element) {
-        case "authors":
-          likes(favAuthors, Author, res)
-          break;
-      
-          case "books":
-
-            likes(favBooks, Book, res)
-          break;
-  
-          case "genres":
-            likes(favGenres, Genre, res)
-          break;
-      
-      
-      }
-    } catch (error) {
-       return next(setError(500, error.message || 'Error finding likes'));
+    if (!user) {
+      return res.status(404).json('user not found');
     }
 
+    switch (element) {
+      case 'authors':
+        likes(favAuthors, Author, res);
+        break;
+
+      case 'books':
+        likes(favBooks, Book, res);
+        break;
+
+      case 'genres':
+        likes(favGenres, Genre, res);
+        break;
+    }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error finding likes'));
   }
-
-
-
+};
 
 //* ________________________________ delete _________________________________________
 
@@ -1442,10 +1393,11 @@ const deleteUser = async (req, res) => {
     await User.findByIdAndDelete(req.user?._id);
     deleteImgCloudinary(req.user?.image);
 
-    //*----- TENEMOS QUE BORRAR SUS LIKES -----------------
+    //*----- TENEMOS QUE BORRAR TODO CON LO QUE SE RELACIONA EN EL MODELO -----------------
 
     try {
-      await Author.updateMany(  //metodo .updateMany(filter, update, options)  segun mongoDB
+      await Author.updateMany(
+        //metodo .updateMany(filter, update, options)  segun mongoDB
         { likes: req.user?._id },
         { $pull: { likes: req.user?._id } }
       );
@@ -1461,11 +1413,53 @@ const deleteUser = async (req, res) => {
             { $pull: { likes: req.user?._id } }
           );
 
-          //lo buscamos pa ver si se ha borrado correctamente
-          const userTest = await User.findById(req.user?._id);
-          return res
-            .status(userTest ? 404 : 200)
-            .json({ deleteTest: userTest ? false : true });
+          try {
+            await Book.updateMany(
+              { readings: req.user?._id },
+              { $pull: { readings: req.user?._id } }
+            );
+
+            try {
+              await Review.updateMany(
+                { postedBy: req.user?._id },
+                { $pull: { postedBy: req.user?._id } }
+              );
+
+              try {
+                await Review.updateMany(
+                  { likes: req.user?._id },
+                  { $pull: { likes: req.user?._id } }
+                );
+
+                try {
+                  await User.updateMany(
+                    { followers: req.user?._id },
+                    { $pull: { followers: req.user?._id } }
+                  );
+                } catch (error) {
+                  return res.status(404).json({
+                    error: 'error catch updating users',
+                    message: error.message,
+                  });
+                }
+              } catch (error) {
+                return res.status(404).json({
+                  error: 'error catch updating reviews',
+                  message: error.message,
+                });
+              }
+            } catch (error) {
+              return res.status(404).json({
+                error: 'error catch updating reviews',
+                message: error.message,
+              });
+            }
+          } catch (error) {
+            return res.status(404).json({
+              error: 'error catch updating books',
+              message: error.message,
+            });
+          }
         } catch (error) {
           return res.status(404).json({
             error: 'error catch updating genres',
@@ -1499,6 +1493,7 @@ module.exports = {
   autoLogin,
   resendCode,
   userById,
+  userByUserName,
   verifyCode,
   changePassword,
   sendNewPassword,
@@ -1512,5 +1507,5 @@ module.exports = {
   addFavouriteGenre,
   followUser,
   userLikedAuthors,
-  userLikes
+  userLikes,
 };

@@ -9,8 +9,18 @@ const AuthorSchema = new Schema(
   {
     name: {
       type: String,
+      trim: true,
       unique: false,
-      required: false,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+      required: true,
+    },
+    secondLastName: {
+      type: String,
+      trim: true,
     },
     gender: {
       type: String,

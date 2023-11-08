@@ -3,6 +3,7 @@ const User = require('../models/User.models');
 const Book = require('../models/Book.model');
 const Author = require('../models/Author.model');
 const Genre = require('../models/Genre.model');
+const Review = require('../models/Review.model')
 
 //?------------------------- utils -------------------------------
 
@@ -515,9 +516,35 @@ const deleteBooks = async (req, res) => {
               { $pull: { favBooks: id } }
             )
 
-            const bookDeleted = await Book.findById(id)
+            try{ 
+              await User.updateMany(
+                { readBooks: id },
+                { $pull: { readBooks: id } }
+              )
+
+            try {
+              await Review.updateMany(
+                { books: id },
+                { $pull: { books: id } }
+              )
+
+              const bookDeleted = await Book.findById(id)
               return res.status( bookDeleted ? 404 : 200).json( bookDeleted ? 'error deleting book' : 'this book no longer exists')
 
+            } catch (error) {
+              return res.status(404).json({
+                error: 'error catch updating reviews',
+                message: error.message,
+              });
+            }
+
+          }catch (error) {
+            return res.status(404).json({
+              error: 'error catch updating user',
+              message: error.message,
+            });
+          }
+           
             
           } catch (error) {
             return res.status(404).json({
