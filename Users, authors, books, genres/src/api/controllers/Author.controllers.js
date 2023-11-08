@@ -462,7 +462,7 @@ const toggleGenres = async (req, res, next) => {
         if (authorById.genres.includes(genre)) {
           try {
             await Author.findByIdAndUpdate(id, {
-              $pull: { genres: subgenre },
+              $pull: { genres: genre },
             });
             try {
               await Genre.findByIdAndUpdate(genre, {
@@ -483,7 +483,7 @@ const toggleGenres = async (req, res, next) => {
         } else {
           try {
             await Author.findByIdAndUpdate(id, {
-              $push: { genres: subgenre },
+              $push: { genres: genre },
             });
             try {
               await Genre.findByIdAndUpdate(genre, {
