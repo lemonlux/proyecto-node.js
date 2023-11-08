@@ -1368,40 +1368,6 @@ const userLikedAuthors = async (req,res,next) =>{
   }
   }
   
-//?---------------------------------------------------------------------------------
-//! ---------------------------- GET LIKED BOOKS ---------------------------------
-//?---------------------------------------------------------------------------------
-
-const userLikedBooks = async (req,res,next) =>{
-
-  const { _id, favBooks } = req.user
-  try {
-    const user = await User.findById(_id)
-    console.log(favBooks)
-  
-    if(user){
-      let likesArr = []
-  
-      Promise.all(
-        favBooks.map(async (bookId)=>{
-          console.log('entro')
-          try {
-            const book = await Book.findById(bookId)
-            likesArr.push(book.name)
-          } catch (error) {
-            return res.status(404).json('no se ha encontrado')
-          }
-        }),
-      ).then( async () =>{
-  return res.status(200).json(likesArr)
-      })
-    }else{
-      return res.status(404).json('user not found')
-      }
-  } catch (error) {
-    return next(setError(500, error.message || 'Error finding liked authors'));
-  }
-  }
 
 //?---------------------------------------------------------------------------------
 //! ----------------------------- GET LIKES SWITCH ---------------------------------
