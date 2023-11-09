@@ -68,11 +68,82 @@ const createReview = async (req,res,next) =>{
             const savedReview = await newReview.save()
             
             if(savedReview){
+                console.log(savedReview)
+                if (!book.reviews.includes(savedReview)){
+                    try {
+                        await Book.findByIdAndUpdate(idBook, {
+                            $push: { reviews: savedReview }
+                        })
+
+                       try {
+                        const { _id } = req.user
+                                await User.findByIdAndUpdate(_id, {
+                                    $push: { reviews: savedReview }
+                                })
+
+                            try {
+                                await Review.findByIdAndUpdate(savedReview._id, {
+                                $push: { books: book }
+                            })
+                            try{ 
+                                 await Review.findByIdAndUpdate(savedReview._id, {
+                                $push: { postedBy: _id }
+                                 })
+
+
+                                try {
+                                    const bookWithReview = await Book.findById(idBook)
+                                    const reviewWithBook = await Review.findById(savedReview._id)
+                                    const userReviewed = await User.findById(_id)
+        
+                                        return res.status(200).json({
+                                            bookWithReview,
+                                            reviewWithBook,
+                                            userReviewed
+                                        })
+                                } catch (error) {
+                                    return res.status(404).json({
+                                        error: 'error returning response',
+                                        message: error.message
+                                    })
+                                }
+                            }catch (error){
+                                return res.status(404).json({
+                                    error: 'error saving user into review',
+                                    message: error.message
+                                })
+                            }
+                            
+
+                            } catch (error) {
+                                return res.status(404).json({
+                                    error: 'error saving  book into review',
+                                    message: error.message
+                                })
+                            }
+
+                        
+                       } catch (error) {
+                        return res.status(404).json({
+                            error: 'error savingreview into user',
+                            message: error.message
+                        })
+                       }
+
+
+                    } catch (error) {
+                        return res.status(404).json({
+                            error: 'error saving review into book',
+                            message: error.message
+                        })
+                    }
+                }else{
+                    return res.status(404).json('this review already exists')
+                }
 
             }else{
                 return res.status(404).json('could not save review')
             }
-    
     
     
     
@@ -90,8 +161,6 @@ const createReview = async (req,res,next) =>{
         return next(setError(500, error.message || 'Error to create')); 
     }
   
-
-
 
 }
 
@@ -114,3 +183,23 @@ const createReview = async (req,res,next) =>{
 //?---------------------------------------------------------------------------------
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
+
+
+const deleteReview = async (req,res,next) =>{
+    try {
+        const { id } = req.params
+        await Review.findByIdAndDelete(id)
+
+    } catch (error) {
+        return next(
+            setError(500, error.message || 'Error to delete')
+          );
+    }
+}
+
+
+
+
+
+
+module.exports = { createReview }
