@@ -92,14 +92,14 @@ const createReview = async (req,res,next) =>{
 
 
                                 try {
-                                    const bookWithReview = await Book.findById(idBook)
-                                    const reviewWithBook = await Review.findById(savedReview._id)
-                                    const userReviewed = await User.findById(_id)
+                                    const bookUpdated = await Book.findById(idBook)
+                                    const reviewCreated = await Review.findById(savedReview._id)
+                                    const userUpdated = await User.findById(_id)
         
                                         return res.status(200).json({
-                                            bookWithReview,
-                                            reviewWithBook,
-                                            userReviewed
+                                            bookUpdated,
+                                            reviewCreated,
+                                            userUpdated
                                         })
                                 } catch (error) {
                                     return res.status(404).json({
@@ -186,15 +186,78 @@ const createReview = async (req,res,next) =>{
 
 
 const deleteReview = async (req,res,next) =>{
+   
+   try {
+    
+    const { id } = req.params // id de la REVIEW
+    const reviewToDelete = await Review.findById(id)
+    console.log(reviewToDelete.postedBy)
+    if(reviewToDelete.postedBy.includes(req.user?._id)){
+
     try {
-        const { id } = req.params
+        
         await Review.findByIdAndDelete(id)
+
+        try {
+
+            await Book.updateMany(
+                { reviews: id },
+               { $pull: { reviews: id }}
+            )
+
+            try {
+                await User.updateMany(
+                    { reviews: id },
+                    { $pull: { reviews: id } }
+                )
+
+                    try {
+                        await User.updateMany(
+                            { likedReviews: id },
+                    { $pull: { likedReviews: id } }
+                        )
+
+                        const deletedReview = await Review.findById(id)
+                        return res.status( deletedReview ? 404 : 200).json ( deletedReview ? deletedReview : 'borrado correctamente')
+
+                    } catch (error) {
+                        return res.status(404).json({
+                            error: 'error catch updating user',
+                            message: error.message,
+                          });
+                    }
+
+
+            } catch (error) {
+                return res.status(404).json({
+                    error: 'error catch updating user',
+                    message: error.message,
+                  });
+            }
+        } catch (error) {
+            return res.status(404).json({
+                error: 'error catch updating book',
+                message: error.message,
+              });
+        }
+
+
 
     } catch (error) {
         return next(
             setError(500, error.message || 'Error to delete')
           );
     }
+
+}else{
+    return res.status(404).json('esta review no pertenece a este usuario')
+}
+   } catch (error) {
+    return next(
+        setError(500, error.message || 'Error finding review')
+      );
+   }
+
 }
 
 
@@ -202,4 +265,4 @@ const deleteReview = async (req,res,next) =>{
 
 
 
-module.exports = { createReview }
+module.exports = { createReview, deleteReview }
