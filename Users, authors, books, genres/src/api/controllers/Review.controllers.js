@@ -53,6 +53,53 @@ const setError = require('../../helpers/handleError');
 //?---------------------------------------------------------------------------------
 //! -------------------------------- CREATE ----------------------------------------
 //?---------------------------------------------------------------------------------
+// la reseña no es independiente, tengo que crearla directamente metiendola en el populate de los books- es un toggle y create
+
+
+const createReview = async (req,res,next) =>{
+   
+    try {
+        const { idBook } = req.params //id del LIBRO!!!!!!!
+        const book = await Book.findById(idBook)
+        if(book){
+          try {
+            await Review.syncIndexes()
+            const newReview = new Review(req.body)
+            const savedReview = await newReview.save()
+            
+            if(savedReview){
+
+            }else{
+                return res.status(404).json('could not save review')
+            }
+    
+    
+    
+    
+         } catch (error) {
+            return res.status(404).json({
+                error: 'error saving review',
+                message: error.message
+            })
+         }
+     }else{
+        return res.status(404).json('book not found')
+    }
+
+    } catch (error) {
+        return next(setError(500, error.message || 'Error to create')); 
+    }
+  
+
+
+
+}
+
+
+
+
+
+
 
 
 //?---------------------------------------------------------------------------------
