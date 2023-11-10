@@ -402,8 +402,14 @@ const updateBooks = async (req, res) => {
       const customBookBody = {
         _id: bookById._id,
         name: req.body?.name ? req.body?.name : bookById.name,
-        year: req.body?.year ? req.body?.year : bookById.year,
-        genre: req.body?.genre ? req.body?.genre : bookById.genre,
+        published: req.body?.published
+          ? req.body?.published
+          : bookById.published,
+        genres: bookById.genres,
+        authors: bookById.authors,
+        likes: bookById.likes,
+        readings: bookById.readings,
+        reviews: bookById.reviews,
       };
       try {
         await Book.findByIdAndUpdate(id, customBookBody);

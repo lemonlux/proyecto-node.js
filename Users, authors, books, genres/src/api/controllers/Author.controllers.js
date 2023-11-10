@@ -275,6 +275,9 @@ const update = async (req, res, next) => {
           ? req.body?.secondLastName
           : authorById.secondLastName,
         yearBorn: req.body?.yearBorn ? req.body?.yearBorn : authorById.yearBorn,
+        books: authorById.books,
+        genres: authorById.genres,
+        likes: authorById.likes,
       };
 
       if (req.body?.gender) {

@@ -85,10 +85,10 @@ const getAllGenres = async (req, res) => {
 
 const getGenreByName = async (req, res) => {
   try {
-    const { type } = req.params;
+    const { subgenre } = req.body;
     console.log(req.body);
 
-    const genreByType = await Genre.find({ type });
+    const genreByType = await Genre.find({ subgenre });
 
     return res
       .status(genreByType ? 200 : 404)
@@ -188,6 +188,9 @@ const updateGenre = async (req, res, next) => {
         description: req.body?.description
           ? req.body?.description
           : genreById.description,
+        authors: genreById.authors,
+        books: genreById.books,
+        likes: genreById.likes,
       };
 
       if (req.body?.genre) {

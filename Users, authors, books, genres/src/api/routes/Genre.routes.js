@@ -17,7 +17,7 @@ const GenreRoutes = require('express').Router();
 
 GenreRoutes.get('/:id', getGenreById);
 GenreRoutes.get('/', getAllGenres);
-GenreRoutes.get('/getByType/:type', getGenreByName);
+GenreRoutes.get('/get/getByType', getGenreByName);
 GenreRoutes.get('/sort/sortAtoZ/', getGenressAtoZ);
 GenreRoutes.get('/getBooks/:id', bookByGenre);
 
