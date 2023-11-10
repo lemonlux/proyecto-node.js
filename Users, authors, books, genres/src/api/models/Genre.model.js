@@ -6,13 +6,17 @@ const GenreSchema = new Schema(
     genre: {
       type: String,
       enum: [
-        'Narrativo', 'Didáctico', 'Dramático/Teatral', 'Lírico', 'Poético'
+        'Narrativo',
+        'Didáctico',
+        'Dramático/Teatral',
+        'Lírico',
+        'Poético',
       ],
-      required: true
+      required: true,
     },
     subgenre: {
       type: String,
-      required: true
+      required: true,
     },
     description: {
       type: String,
@@ -24,16 +28,16 @@ const GenreSchema = new Schema(
       },
     ],
     books: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Book',
-        },
-      ],
-      likes: [
-        {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'User',
-        },
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Book',
+      },
+    ],
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
     ],
   },
   {

@@ -42,13 +42,11 @@ app.use('/api/v1/authors/', AuthorRoutes);
 const BookRoutes = require('./src/api/routes/Book.routes');
 app.use('/api/v1/books/', BookRoutes);
 
-const GenreRoutes = require('./src/api/routes/Genre.routes')
-app.use('/api/v1/genres/', GenreRoutes)
+const GenreRoutes = require('./src/api/routes/Genre.routes');
+app.use('/api/v1/genres/', GenreRoutes);
 
-const ReviewRoutes = require('./src/api/routes/Review.routes')
-app.use('/api/v1/reviews/', ReviewRoutes)
-
-
+const ReviewRoutes = require('./src/api/routes/Review.routes');
+app.use('/api/v1/reviews/', ReviewRoutes);
 
 //!---6---- ERRORES DE RUTA Y CRASH
 

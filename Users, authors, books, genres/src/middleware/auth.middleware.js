@@ -24,7 +24,8 @@ hay que remplazar esta palabra Bearer por un espacio vacío para que JSON WEB TO
     return next(new Error('Unauthorized'));
   }
 
-  try { //si no hay token -- unauthorized. si sí hay --- se verifica
+  try {
+    //si no hay token -- unauthorized. si sí hay --- se verifica
     // podriamos hacer jwt.verify(token, jwt_secret)
 
     const decoded = verifyToken(token, process.env.JWT_SECRET);
@@ -38,10 +39,9 @@ hay que remplazar esta palabra Bearer por un espacio vacío para que JSON WEB TO
   }
 };
 
-
-const isAuthAsAdmin = async (req,res,next) =>{
+const isAuthAsAdmin = async (req, res, next) => {
   //necesitamos el token de igual manera
-  const token = req.headers.authorization?.replace('Bearer ', '')
+  const token = req.headers.authorization?.replace('Bearer ', '');
   if (!token) {
     //si no tengo token hay un error y lo voy a mandar del middleware al user
     return next(new Error('Unauthorized'));
@@ -51,19 +51,14 @@ const isAuthAsAdmin = async (req,res,next) =>{
     const decoded = verifyToken(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id);
 
-    if (req.user.rol !== 'admin'){
+    if (req.user.rol !== 'admin') {
       return next(new Error('Not admin, unauthorized'));
     }
 
-   next()
-
+    next();
   } catch (error) {
-    return next(error)
+    return next(error);
   }
-}
-
-
-
-
+};
 
 module.exports = { isAuth, isAuthAsAdmin };

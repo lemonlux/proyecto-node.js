@@ -421,7 +421,7 @@ const sendCode = async (req, res, next) => {
 //! --------------------------------- LOGIN ----------------------------------------
 //?---------------------------------------------------------------------------------
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   //no hay imagen que cachear ni que sincronizar indexes (no estamos metiendo info nueva)
   try {
     //ya tenemos usuario registrado tenemos que ver si existe
@@ -461,7 +461,7 @@ const login = async (req, res) => {
 //* -- lo metemos por JSON y el token que nos devuelve lo tenemos que copiar y pegar encima del token anterior
 //* guardado en las variables de entorno
 
-const autoLogin = async (req, res) => {
+const autoLogin = async (req, res, next) => {
   try {
     const { userEmail, password } = req.body;
     const userDB = await User.findOne({ userEmail });
@@ -491,7 +491,7 @@ const autoLogin = async (req, res) => {
 //! ----------------------------- RESEND CODE --------------------------------------
 //?---------------------------------------------------------------------------------
 
-const resendCode = async (req, res) => {
+const resendCode = async (req, res, next) => {
   try {
     const { userEmail } = req.body;
     const userExists = await User.findOne({ userEmail });
@@ -627,7 +627,7 @@ necesitamos el email del usuario, redirigirlo
 funciones de crear transporte, mailInfo y enviarlo.
 y una funcion de creación de contraseñas random--- randomPasswordGenerator en utils */
 
-const changePassword = async (req, res) => {
+const changePassword = async (req, res, next) => {
   try {
     const { userEmail } = req.body;
     const userExists = await User.findOne({ userEmail });
@@ -747,7 +747,7 @@ const sendNewPassword = async (req, res, next) => {
 antigua y la actual, comparar la antigua a la guardada y validar que la nueva sea segura. entonces findByIdAndUpdate.
 también vamos a hacer un test para comprobar que se ha modificado correctamente */
 
-const modifyPassword = async (req, res) => {
+const modifyPassword = async (req, res, next) => {
   try {
     const { password, newPassword } = req.body;
     const validPassword = validator.isStrongPassword(newPassword);
@@ -805,7 +805,7 @@ const modifyPassword = async (req, res) => {
 //! ----------------------------- GENERAL UPDATE -----------------------------------
 //?---------------------------------------------------------------------------------
 
-const updateUser = async (req, res) => {
+const updateUser = async (req, res, next) => {
   //si hay subida imagen siempre se captura por si hay un error borrarla --> upload en la ruta
   let catchImg = req.file?.path;
 
@@ -1301,35 +1301,35 @@ const followUser = async (req, res, next) => {
 //! ---------------------------- GET LIKED AUTHORS ---------------------------------
 //?---------------------------------------------------------------------------------
 
-const userLikedAuthors = async (req, res, next) => {
-  const { _id, favAuthors } = req.user;
-  try {
-    const user = await User.findById(_id);
-    console.log(favAuthors);
+// const userLikedAuthors = async (req, res, next) => {
+//   const { _id, favAuthors } = req.user;
+//   try {
+//     const user = await User.findById(_id);
+//     console.log(favAuthors);
 
-    if (user) {
-      let likesArr = [];
+//     if (user) {
+//       let likesArr = [];
 
-      Promise.all(
-        favAuthors.map(async (authorId) => {
-          console.log('entro');
-          try {
-            const author = await Author.findById(authorId);
-            likesArr.push(author);
-          } catch (error) {
-            return res.status(404).json('no se ha encontrado');
-          }
-        })
-      ).then(async () => {
-        return res.status(200).json(likesArr);
-      });
-    } else {
-      return res.status(404).json('user not found');
-    }
-  } catch (error) {
-    return next(setError(500, error.message || 'Error finding liked authors'));
-  }
-};
+//       Promise.all(
+//         favAuthors.map(async (authorId) => {
+//           console.log('entro');
+//           try {
+//             const author = await Author.findById(authorId);
+//             likesArr.push(author);
+//           } catch (error) {
+//             return res.status(404).json('no se ha encontrado');
+//           }
+//         })
+//       ).then(async () => {
+//         return res.status(200).json(likesArr);
+//       });
+//     } else {
+//       return res.status(404).json('user not found');
+//     }
+//   } catch (error) {
+//     return next(setError(500, error.message || 'Error finding liked authors'));
+//   }
+// };
 
 //?---------------------------------------------------------------------------------
 //! ----------------------------- GET LIKES SWITCH ---------------------------------
@@ -1387,7 +1387,7 @@ const userLikes = async (req, res, next) => {
 //! --------------------------------- DELETE ---------------------------------------
 //?---------------------------------------------------------------------------------
 
-const deleteUser = async (req, res) => {
+const deleteUser = async (req, res, next) => {
   //aquí NO hay que hacer destructuring porque la info la vamos a sacar del req.user
   try {
     await User.findByIdAndDelete(req.user?._id);
@@ -1437,13 +1437,11 @@ const deleteUser = async (req, res) => {
                     { $pull: { followers: req.user?._id } }
                   );
 
-                      //lo buscamos pa ver si se ha borrado correctamente
-                      const userTest = await User.findById(req.user?._id);
-                      return res
-                        .status(userTest ? 404 : 200)
-                        .json({ deleteTest: userTest ? false : true });
-
-
+                  //lo buscamos pa ver si se ha borrado correctamente
+                  const userTest = await User.findById(req.user?._id);
+                  return res
+                    .status(userTest ? 404 : 200)
+                    .json({ deleteTest: userTest ? false : true });
                 } catch (error) {
                   return res.status(404).json({
                     error: 'error catch updating users',
@@ -1514,6 +1512,5 @@ module.exports = {
   addFavouriteAuthor,
   addFavouriteGenre,
   followUser,
-  userLikedAuthors,
   userLikes,
 };

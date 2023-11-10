@@ -21,7 +21,7 @@ const generateToken = (id, email) => {
 
 //* cuando nos logamos se nos crea un token con generateToken, y tenemos que verificarlo y sacar la info - email, id
 
-const verifyToken = (token, secretOrPublicKey) => {
+const verifyToken = (token) => {
   //el verificar lo necesitamos en el middleware de autenticacion
 
   if (!token) {

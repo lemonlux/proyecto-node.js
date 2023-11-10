@@ -7,23 +7,19 @@ const Author = require('../models/Author.model');
 const Genre = require('../models/Genre.model');
 
 //?------------------------- utils -------------------------------
-const { validEnumGender, validEnumLanguage } = require('../../utils/validEnum')
-const normalizeFunction = require('../../utils/normalize')
+const { validEnumGender, validEnumLanguage } = require('../../utils/validEnum');
+const normalizeFunction = require('../../utils/normalize');
 
 //?----------------------- middleware -----------------------------
 const { deleteImgCloudinary } = require('../../middleware/files.middleware');
 
 //?------------------------ librería ------------------------------
 
-
 //?------------------------- estados ------------------------------
 
 //?------------------------- helpers ------------------------------
 
-const setError = require('../../helpers/handleError')
-
-
-
+const setError = require('../../helpers/handleError');
 
 //?---------------------------------------------------------------------------------
 //! --23----------------------------- CREATE ----------------------------------------
@@ -56,9 +52,7 @@ const create = async (req, res, next) => {
   } catch (error) {
     // si hay un error, hay que borrar la imagen en el cloudinary
     req.file?.path && deleteImgCloudinary(catchImg);
-    return next(
-      setError(500, error.message || 'Error general to create')
-    );
+    return next(setError(500, error.message || 'Error general to create'));
   }
 };
 //*---------------------------------- read ---------------------------------------
@@ -135,12 +129,11 @@ const getByName = async (req, res) => {
 //! ------------------------------- SORT BY A-Z ------------------------------------
 //?---------------------------------------------------------------------------------
 
-const getAuthorsAtoZ = async (req,res,next) =>{
+const getAuthorsAtoZ = async (req, res, next) => {
   try {
-    const allAuthors = await Author.find()
-    if(allAuthors.length > 0){
-  
-      allAuthors.sort((a,b)=>{
+    const allAuthors = await Author.find();
+    if (allAuthors.length > 0) {
+      allAuthors.sort((a, b) => {
         if (a.lastName > b.lastName) {
           return 1;
         }
@@ -149,49 +142,47 @@ const getAuthorsAtoZ = async (req,res,next) =>{
         }
         return 0;
       });
-      console.log(allAuthors)
-  
-       return res.status(200).json({
-        allAuthors
-       })
-  
-     }else{
-       return res.status(404).json('no se han encontrado libros')
-     }
-  
-  } catch (error) {
-    return next(
-      setError(500, error.message || 'Error to find')
-    );
-  }
-  }
+      console.log(allAuthors);
 
-  //?---------------------------------------------------------------------------------
+      return res.status(200).json({
+        allAuthors,
+      });
+    } else {
+      return res.status(404).json('no se han encontrado libros');
+    }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error to find'));
+  }
+};
+
+//?---------------------------------------------------------------------------------
 //! ------------------------------- SORT BY LANGUAGE ---------------------------------
 //?-----------------------------------------------------------------------------------
 
-const getAuthorsByLanguage = async (req,res,next) =>{
+const getAuthorsByLanguage = async (req, res, next) => {
   try {
-    const { language } = req.body
-     const validLanguage = normalizeFunction(language.trim().toLowerCase().toString())
+    const { language } = req.body;
+    const validLanguage = normalizeFunction(
+      language.trim().toLowerCase().toString()
+    );
 
-    const allAuthors = await Author.find()
-    const languageOk = validEnumLanguage(validLanguage)
-console.log(languageOk)
-    if(languageOk){
-      let arrAuthors = []
+    const allAuthors = await Author.find();
+    const languageOk = validEnumLanguage(validLanguage);
+    console.log(languageOk);
+    if (languageOk) {
+      let arrAuthors = [];
       Promise.all(
-        allAuthors.map(async (author)=>{
-          const authorValidLanguage = normalizeFunction(author.language)
+        allAuthors.map(async (author) => {
+          const authorValidLanguage = normalizeFunction(author.language);
           // if (authorValidLanguage.startsWith(validLanguage)) {
-            if(authorValidLanguage === validLanguage){
-             arrAuthors.push(author)
-             console.log(author)
+          if (authorValidLanguage === validLanguage) {
+            arrAuthors.push(author);
+            console.log(author);
           }
         })
-      ).then( async () =>{
-        if(arrAuthors.length > 0){
-          arrAuthors.sort((a,b)=>{
+      ).then(async () => {
+        if (arrAuthors.length > 0) {
+          arrAuthors.sort((a, b) => {
             if (a.name > b.name) {
               return 1;
             }
@@ -201,79 +192,68 @@ console.log(languageOk)
             return 0;
           });
         }
-        console.log(arrAuthors)
-        return res.status(200).json(arrAuthors)
-      })
-  
-     }else{
-       return res.status(404).json('error en la busqueda')
-     }
+        console.log(arrAuthors);
+        return res.status(200).json(arrAuthors);
+      });
+    } else {
+      return res.status(404).json('error en la busqueda');
+    }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'Error to find')
-    );
+    return next(setError(500, error.message || 'Error to find'));
   }
-  }
+};
 
-
-  //?---------------------------------------------------------------------------------
+//?---------------------------------------------------------------------------------
 //! -------------------------------- SEARCH BY NAME ---------------------------------
 //?-----------------------------------------------------------------------------------
-
-
-
-
-
 
 //?---------------------------------------------------------------------------------
 //! --------------------------- GET PUBLISHED BOOKS --------------------------------
 //?---------------------------------------------------------------------------------
 
-const bookPublished = async (req,res,next) =>{
+const bookPublished = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const author = await Author.findById(id)
-    if(author){
-      let publishedArr = []
-      const booksPublished = author.books
-  
-      Promise.all(
-        booksPublished.map(async (booksId)=>{
-          console.log('entro')
-          try {
-            const book = await Book.findById(booksId)
-            publishedArr.push(book)
-          } catch (error) {
-            return res.status(404).json('no se ha encontrado')
-          }
-        }),
-      ).then( async () =>{
-  return res.status(200).json(publishedArr)
-      })
-    }else{
-      return res.status(404).json('author not found')
-      }
-  } catch (error) {
-    return next(setError(500, error.message || 'Error finding published books'));
-  }
-  }
+    const author = await Author.findById(id);
+    if (author) {
+      let publishedArr = [];
+      const booksPublished = author.books;
 
+      Promise.all(
+        booksPublished.map(async (booksId) => {
+          console.log('entro');
+          try {
+            const book = await Book.findById(booksId);
+            publishedArr.push(book);
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado');
+          }
+        })
+      ).then(async () => {
+        return res.status(200).json(publishedArr);
+      });
+    } else {
+      return res.status(404).json('author not found');
+    }
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error finding published books')
+    );
+  }
+};
 
 //*    ----------------------------------------------------------------------------------
 //todo ------------------------------- CON AUTH -----------------------------------------
 //todo -------------------------------DE ADMIN  -----------------------------------------
 //*    ----------------------------------------------------------------------------------
 
-
-
 //*--------------------------------- PATCH ---------------------------------
-
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- GENERAL UPDATE ------------------------------------
 //?---------------------------------------------------------------------------------
 
-const update = async (req, res) => {
+const update = async (req, res, next) => {
   await Author.syncIndexes();
   //siempre sincronizamos indices
   let catchImg = req.file?.path;
@@ -291,18 +271,22 @@ const update = async (req, res) => {
         image: req.file?.path ? catchImg : oldImg,
         name: req.body?.name ? req.body?.name : authorById.name,
         lastName: req.body?.lastName ? req.body?.lastName : authorById.lastName,
-        secondLastName: req.body?.secondLastName ? req.body?.secondLastName : authorById.secondLastName,
-        yearBorn: req.body?.yearBorn ? req.body?.yearBorn : authorById.yearBorn
+        secondLastName: req.body?.secondLastName
+          ? req.body?.secondLastName
+          : authorById.secondLastName,
+        yearBorn: req.body?.yearBorn ? req.body?.yearBorn : authorById.yearBorn,
       };
 
-      if (req.body?.gender){
-        const genderValid = validEnumGender(req.body?.gender)
-        customBody.gender = genderValid ? req.body?.gender : authorById.gender
+      if (req.body?.gender) {
+        const genderValid = validEnumGender(req.body?.gender);
+        customBody.gender = genderValid ? req.body?.gender : authorById.gender;
       }
 
-      if(req.body?.language){
-        const languageValid = validEnumLanguage(req.body?.language)
-        customBody.language = languageValid ? req.body?.language : authorById.language
+      if (req.body?.language) {
+        const languageValid = validEnumLanguage(req.body?.language);
+        customBody.language = languageValid
+          ? req.body?.language
+          : authorById.language;
       }
 
       try {
@@ -319,10 +303,11 @@ const update = async (req, res) => {
         //si el elemento existe
         elementUpdate.forEach((item) => {
           if (req.body[item] === authorByIdUpdate[item]) {
-            if (req.body[item] != authorById[item]){   //si no es la misma que la antigua
-            test[item] = true;
-            }else{
-              test[item] = 'same old info'
+            if (req.body[item] != authorById[item]) {
+              //si no es la misma que la antigua
+              test[item] = true;
+            } else {
+              test[item] = 'same old info';
             }
           } else {
             test[item] = false;
@@ -359,9 +344,7 @@ const update = async (req, res) => {
       }
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'General error to update')
-    );
+    return next(setError(500, error.message || 'General error to update'));
   }
 };
 
@@ -369,11 +352,8 @@ const update = async (req, res) => {
 //! ---------------------------- TOGGLE BOOKS --------------------------------------
 //?-------------------------------- update -----------------------------------------
 
-
-
 const toggleBooks = async (req, res, next) => {
- 
-  const { id } = req.params;   // id del autor
+  const { id } = req.params; // id del autor
   const { books } = req.body; //esto crea un string separado por comas de los books
   const authorById = await Author.findById(id);
   if (authorById) {
@@ -431,29 +411,16 @@ const toggleBooks = async (req, res, next) => {
       });
     });
   } else {
-    return next(
-      setError(500, error.message || 'General error to update')
-    );
+    return res.status(404).json('author not found');
   }
 };
-
-
-
-
-
-
-
-
-
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- TOGGLE GENRES -------------------------------------
 //?-------------------------------- update -----------------------------------------
 
-
 const toggleGenres = async (req, res, next) => {
- 
-  const { id } = req.params;   // id del autor
+  const { id } = req.params; // id del autor
   const { genres } = req.body; //esto crea un string separado por comas de los books
   const authorById = await Author.findById(id);
   if (authorById) {
@@ -511,59 +478,50 @@ const toggleGenres = async (req, res, next) => {
       });
     });
   } else {
-    return next(
-      setError(500, error.message || 'General error to update')
-    );
+    return res.status(404).json('author not found');
   }
 };
-
-
-
 
 //*------------------------------- delete ---------------------------------------
 
 //?---------------------------------------------------------------------------------
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
-const deleteAuthor = async (req, res) => {
-
+const deleteAuthor = async (req, res, next) => {
   try {
     const { id } = req.params;
     await Author.findByIdAndDelete(id);
 
     try {
-        await Book.updateMany(
-          { authors: id },
-          { $pull: { authors: id } }
-        )
+      await Book.updateMany({ authors: id }, { $pull: { authors: id } });
       try {
-          await Genre.updateMany(
-            { books: id },
-            { $pull: { books: id }}
-          )
-          try {
-            await User.updateMany(
-              { favAuthors: id },
-              { $pull: { favAuthors: id } }
-            )
+        await Genre.updateMany({ books: id }, { $pull: { books: id } });
+        try {
+          await User.updateMany(
+            { favAuthors: id },
+            { $pull: { favAuthors: id } }
+          );
 
-            const authorDeleted = await Author.findById(id)
-              return res.status( authorDeleted ? 404 : 200).json( authorDeleted ? 'error deleting author' : 'this author no longer exists')
-
-            
-          } catch (error) {
-            return res.status(404).json({
-              error: 'error catch updating user',
-              message: error.message,
-            });
-          }
+          const authorDeleted = await Author.findById(id);
+          return res
+            .status(authorDeleted ? 404 : 200)
+            .json(
+              authorDeleted
+                ? 'error deleting author'
+                : 'this author no longer exists'
+            );
+        } catch (error) {
+          return res.status(404).json({
+            error: 'error catch updating user',
+            message: error.message,
+          });
+        }
       } catch (error) {
         return res.status(404).json({
           error: 'error catch updating genres',
           message: error.message,
         });
       }
-
     } catch (error) {
       return res.status(404).json({
         error: 'error catch updating book',
@@ -571,12 +529,9 @@ const deleteAuthor = async (req, res) => {
       });
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'Error to delete')
-    );
+    return next(setError(500, error.message || 'Error to delete'));
   }
 };
-
 
 //!---24----- EXPORTAMOS LA FUNCION ENTRE {} (VA A HABER MAS) Y LA IMPORTAMOS EN RUTAS
 module.exports = {

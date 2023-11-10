@@ -16,14 +16,14 @@ const BookSchema = new Schema(
       required: false,
     },
     pages: {
-      type: Number
+      type: Number,
     },
     genres: [
       {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Genre'
-    },
-  ],
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Genre',
+      },
+    ],
     authors: [
       {
         type: mongoose.Schema.Types.ObjectId,

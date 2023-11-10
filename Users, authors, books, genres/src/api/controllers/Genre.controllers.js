@@ -28,11 +28,11 @@ const createGenre = async (req, res, next) => {
     const newGenre = new Genre(req.body);
     const saveGenre = await newGenre.save();
 
-if(saveGenre){
-    return res.status(200).json(saveGenre)
-}else{
-    return res.status(404).json('Couldnt create genre')
-}
+    if (saveGenre) {
+      return res.status(200).json(saveGenre);
+    } else {
+      return res.status(404).json('Couldnt create genre');
+    }
   } catch (error) {
     return next(setError(500, error.message || 'Error to create'));
   }
@@ -46,83 +46,70 @@ if(saveGenre){
 
 //* ---------------------- get by id ---------------------------
 
-const getGenreById = async (req,res,next) =>{
+const getGenreById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const genreById = await Genre.findById(id);
 
-    try {
-        const { id } = req.params
-        const genreById = await Genre.findById(id)
-
-        return res.status( genreById ? 200 : 404).json( genreById ? genreById : 'no se ha encontrado este género')
-        
-    } catch (error) {
-        return res.status(404).json({
-            error: 'error en el catch de get by id',
-            message: error.message,
-          });
-    }
-
-
-}
-
-
-
-
+    return res
+      .status(genreById ? 200 : 404)
+      .json(genreById ? genreById : 'no se ha encontrado este género');
+  } catch (error) {
+    return res.status(404).json({
+      error: 'error en el catch de get by id',
+      message: error.message,
+    });
+  }
+};
 
 //* ------------------------- get all ---------------------------
 
-const getAllGenres = async (req,res,next) =>{
-    try {
-        const allGenres = await Genre.find()
+const getAllGenres = async (req, res) => {
+  try {
+    const allGenres = await Genre.find();
 
-        if(allGenres.length > 0){
-            return res.status(200).json(allGenres)
-
-        }else{
-            return res.status(404).json('no se encontraron géneros')
-        }
-
-
-    } catch (error) {
-        return res.status(404).json({
-            error: 'error en el catch de get by id',
-            message: error.message,
-          });
+    if (allGenres.length > 0) {
+      return res.status(200).json(allGenres);
+    } else {
+      return res.status(404).json('no se encontraron géneros');
     }
-}
-
+  } catch (error) {
+    return res.status(404).json({
+      error: 'error en el catch de get by id',
+      message: error.message,
+    });
+  }
+};
 
 //* ------------------------- get by name ---------------------------
 
-const getGenreByName = async (req,res,next) =>{
-try {
-    const { type } = req.params
-    console.log(req.body)
+const getGenreByName = async (req, res) => {
+  try {
+    const { type } = req.params;
+    console.log(req.body);
 
-    const genreByType = await Genre.find({ type })
+    const genreByType = await Genre.find({ type });
 
-    return res.status( genreByType ? 200 : 404).json( genreByType ? genreByType : 'no se ha encontrado el género')
-    
-} catch (error) {
+    return res
+      .status(genreByType ? 200 : 404)
+      .json(genreByType ? genreByType : 'no se ha encontrado el género');
+  } catch (error) {
     return res.status(404).json({
-        error: 'error en el catch de get by id',
-        message: error.message,
-      });
-}
-
-}
-
-
+      error: 'error en el catch de get by id',
+      message: error.message,
+    });
+  }
+};
 
 //?---------------------------------------------------------------------------------
 //! ------------------------------- SORT BY A-Z ------------------------------------
 //?---------------------------------------------------------------------------------
 
-const getGenressAtoZ = async (req,res,next) =>{
+const getGenressAtoZ = async (req, res, next) => {
   try {
-    const allGenres = await Genre.find()
-    if(allGenres.length > 0){
-  
-      allGenres.sort((a,b)=>{
+    const allGenres = await Genre.find();
+    if (allGenres.length > 0) {
+      allGenres.sort((a, b) => {
         if (a.subgenre > b.subgenre) {
           return 1;
         }
@@ -131,101 +118,86 @@ const getGenressAtoZ = async (req,res,next) =>{
         }
         return 0;
       });
-      console.log(allGenres)
-  
-       return res.status(200).json({
-        allGenres
-       })
-  
-     }else{
-       return res.status(404).json('no se han encontrado generos')
-     }
-  
-  } catch (error) {
-    return next(
-      setError(500, error.message || 'Error to find')
-    );
-  }
-  }
+      console.log(allGenres);
 
+      return res.status(200).json({
+        allGenres,
+      });
+    } else {
+      return res.status(404).json('no se han encontrado generos');
+    }
+  } catch (error) {
+    return next(setError(500, error.message || 'Error to find'));
+  }
+};
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- GET BOOKS BY GENRE --------------------------------
 //?---------------------------------------------------------------------------------
 
+const bookByGenre = async (req, res, next) => {
+  try {
+    const { id } = req.params; // ID GENRE
+    const genre = await Genre.findById(id);
+    if (genre) {
+      let booksByGenreArr = [];
+      const booksByGenre = genre.books;
 
-
-  const bookByGenre = async (req,res,next) =>{
-    try {
-      const { id } = req.params;   // ID GENRE
-      const genre = await Genre.findById(id)
-      if(genre){
-        let booksByGenreArr = []
-        const booksByGenre = genre.books
-    
-        Promise.all(
-          booksByGenre.map(async (booksId)=>{
-            console.log('entro')
-            try {
-              const book = await Book.findById(booksId)
-              booksByGenreArr.push(book)
-            } catch (error) {
-              return res.status(404).json('no se ha encontrado')
-            }
-          }),
-        ).then( async () =>{
-    return res.status(200).json(booksByGenreArr)
+      Promise.all(
+        booksByGenre.map(async (booksId) => {
+          console.log('entro');
+          try {
+            const book = await Book.findById(booksId);
+            booksByGenreArr.push(book);
+          } catch (error) {
+            return res.status(404).json('no se ha encontrado');
+          }
         })
-      }else{
-        return res.status(404).json('author not found')
-        }
-    } catch (error) {
-      return next(setError(500, error.message || 'Error finding published books'));
+      ).then(async () => {
+        return res.status(200).json(booksByGenreArr);
+      });
+    } else {
+      return res.status(404).json('author not found');
     }
-    }
-
-
-
-
-
-
+  } catch (error) {
+    return next(
+      setError(500, error.message || 'Error finding published books')
+    );
+  }
+};
 
 //*    ----------------------------------------------------------------------------------
 //todo ------------------------------- CON AUTH -----------------------------------------
 //todo -------------------------------DE ADMIN  -----------------------------------------
 //*    ----------------------------------------------------------------------------------
 
-
-
-
-
 //*--------------------------------- PATCH ---------------------------------
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- GENERAL UPDATE ------------------------------------
 //?---------------------------------------------------------------------------------
-const updateGenre = async (req, res) => {
+const updateGenre = async (req, res, next) => {
   await Genre.syncIndexes();
   try {
     const { id } = req.params; //hacemos la const del id y lo buscamos con findById
     const genreById = await Genre.findById(id);
     //si ese autor existiese
     if (genreById) {
-
       const customBody = {
         subgenre: req.body?.subgenre ? req.body?.subgenre : genreById.subgenre,
-        description: req.body?.description ? req.body?.description : genreById.description
+        description: req.body?.description
+          ? req.body?.description
+          : genreById.description,
       };
 
-      if (req.body?.genre){
-        const genreValid = validEnumGenre(req.body?.gender)
-        customBody.genre = genreValid ? req.body?.genre : genreById.genre
+      if (req.body?.genre) {
+        const genreValid = validEnumGenre(req.body?.gender);
+        customBody.genre = genreValid ? req.body?.genre : genreById.genre;
       }
-
 
       try {
         await Genre.findByIdAndUpdate(id, customBody);
-     
+
         //todo----- VAMOS A HACER EL TESTING -------
 
         const genreByIdUpdate = await Genre.findById(id);
@@ -235,10 +207,11 @@ const updateGenre = async (req, res) => {
         //si el elemento existe
         elementUpdate.forEach((item) => {
           if (req.body[item] === genreByIdUpdate[item]) {
-            if (req.body[item] != genreByIdUpdate[item]){   //si no es la misma que la antigua
-            test[item] = true;
-            }else{
-              test[item] = 'same old info'
+            if (req.body[item] != genreByIdUpdate[item]) {
+              //si no es la misma que la antigua
+              test[item] = true;
+            } else {
+              test[item] = 'same old info';
             }
           } else {
             test[item] = false;
@@ -268,19 +241,15 @@ const updateGenre = async (req, res) => {
       }
     }
   } catch (error) {
-    return next(
-      setError(500, error.message || 'General error to update')
-    );
+    return next(setError(500, error.message || 'General error to update'));
   }
 };
 //?---------------------------------------------------------------------------------
 //! ---------------------------- TOGGLE BOOKS --------------------------------------
 //?-------------------------------- update -----------------------------------------
 
-
 const toggleBooks = async (req, res, next) => {
- 
-  const { id } = req.params;   // id del autor
+  const { id } = req.params; // id del autor
   const { books } = req.body; //esto crea un string separado por comas de los books
   const genreById = await Genre.findById(id);
   if (genreById) {
@@ -338,25 +307,17 @@ const toggleBooks = async (req, res, next) => {
       });
     });
   } else {
-    return next(
-      setError(500, error.message || 'General error to update')
-    );
+    return res.status(404).json('genre not found');
   }
 };
-
-
-
-
-
 
 //?---------------------------------------------------------------------------------
 //! ---------------------------- TOGGLE AUTHORS ------------------------------------
 //?-------------------------------- update -----------------------------------------
 
-
 const toggleAuthors = async (req, res, next) => {
   //lo vamos a localizar con un id
-  const { id } = req.params;   // GENRE
+  const { id } = req.params; // GENRE
   const { authors } = req.body; //esto crea un string separado por comas de los autores
   const genreById = await Genre.findById(id);
   if (genreById) {
@@ -365,7 +326,7 @@ const toggleAuthors = async (req, res, next) => {
     // console.log(bookById);
     Promise.all(
       arrayIdAuthors.map(async (author) => {
-        console.log(author)
+        console.log(author);
         if (genreById.authors.includes(author)) {
           try {
             await Genre.findByIdAndUpdate(id, {
@@ -420,83 +381,67 @@ const toggleAuthors = async (req, res, next) => {
   }
 };
 
-
-
-
-
-
 //*------------------------------- delete ---------------------------------------
 
 //?---------------------------------------------------------------------------------
 //! -------------------------------- DELETE ----------------------------------------
 //?---------------------------------------------------------------------------------
 
-const deleteGenre = async (req, res) => {
+const deleteGenre = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await Genre.findByIdAndDelete(id);
 
     try {
-      const { id } = req.params;
-      await Genre.findByIdAndDelete(id);
-  
+      await Book.updateMany({ authors: id }, { $pull: { authors: id } });
       try {
-          await Book.updateMany(
-            { authors: id },
-            { $pull: { authors: id } }
-          )
+        await Author.updateMany({ genres: id }, { $pull: { genres: id } });
         try {
-            await Author.updateMany(
-              { genres: id },
-              { $pull: { genres: id }}
-            )
-            try {
-              await User.updateMany(
-                { favGenres: id },
-                { $pull: { favGenres: id } }
-              )
-  
-              const genreDeleted = await Genre.findById(id)
-                return res.status( genreDeleted ? 404 : 200).json( genreDeleted ? 'error deleting genre' : 'this genre no longer exists')
-  
-              
-            } catch (error) {
-              return res.status(404).json({
-                error: 'error catch updating user',
-                message: error.message,
-              });
-            }
+          await User.updateMany(
+            { favGenres: id },
+            { $pull: { favGenres: id } }
+          );
+
+          const genreDeleted = await Genre.findById(id);
+          return res
+            .status(genreDeleted ? 404 : 200)
+            .json(
+              genreDeleted
+                ? 'error deleting genre'
+                : 'this genre no longer exists'
+            );
         } catch (error) {
           return res.status(404).json({
-            error: 'error catch updating authors',
+            error: 'error catch updating user',
             message: error.message,
           });
         }
-  
       } catch (error) {
         return res.status(404).json({
-          error: 'error catch updating book',
+          error: 'error catch updating authors',
           message: error.message,
         });
       }
     } catch (error) {
-      return next(
-        setError(500, error.message || 'Error to delete')
-      );
+      return res.status(404).json({
+        error: 'error catch updating book',
+        message: error.message,
+      });
     }
-  };
+  } catch (error) {
+    return next(setError(500, error.message || 'Error to delete'));
+  }
+};
 
-
-
-
-
-
-module.exports = { 
-    createGenre,
-    getGenreById,
-    getAllGenres,
-    getGenreByName,
-    getGenressAtoZ,
-    bookByGenre,
-    updateGenre,
-    toggleAuthors,
-    toggleBooks,
-    deleteGenre
+module.exports = {
+  createGenre,
+  getGenreById,
+  getAllGenres,
+  getGenreByName,
+  getGenressAtoZ,
+  bookByGenre,
+  updateGenre,
+  toggleAuthors,
+  toggleBooks,
+  deleteGenre,
 };
