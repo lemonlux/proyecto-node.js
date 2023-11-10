@@ -77,7 +77,7 @@ const createReview = async (req, res, next) => {
                       return res.status(200).json({
                         reviewCreated: await Review.findById(
                           savedReview._id
-                        ).populate('books'),
+                        ).populate('books postedBy'), //ponemos el populate solo para ver en insomnia los objetos populados
                       });
                     } catch (error) {
                       return (

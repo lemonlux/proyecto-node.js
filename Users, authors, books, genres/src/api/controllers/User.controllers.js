@@ -932,7 +932,7 @@ const addFavouriteBook = async (req, res, next) => {
           const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('favBooks'),
             bookUpdated,
             update: `pulled ${bookUpdated.name} from User's likes`,
           });
@@ -965,7 +965,7 @@ const addFavouriteBook = async (req, res, next) => {
           const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('favBooks'),
             bookUpdated,
             update: `pushed ${bookUpdated.name} to User's likes`,
           });
@@ -1013,7 +1013,7 @@ const addReadBook = async (req, res, next) => {
           const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('readBooks'),
             bookUpdated,
             update: `pulled ${bookUpdated.name} from User's readings`,
           });
@@ -1046,7 +1046,7 @@ const addReadBook = async (req, res, next) => {
           const bookUpdated = await Book.findById(idBook);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('readBooks'),
             bookUpdated,
             update: `pushed ${bookUpdated.name} to User's readings`,
           });
@@ -1093,7 +1093,7 @@ const addFavouriteAuthor = async (req, res, next) => {
           const authorUpdated = await Author.findById(idAuthor);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('favAuthors'),
             authorUpdated,
             update: `pulled ${authorUpdated.name} from User's likes`,
           });
@@ -1123,7 +1123,7 @@ const addFavouriteAuthor = async (req, res, next) => {
           const authorUpdated = await Author.findById(idAuthor);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('favAuthors'),
             authorUpdated,
             update: `pushed ${authorUpdated.name} to User's likes`,
           });
@@ -1170,7 +1170,7 @@ const addFavouriteGenre = async (req, res, next) => {
           const genreUpdated = await Genre.findById(idGenre);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('favGenres'),
             genreUpdated,
             update: `pulled ${genreUpdated.type} from User's likes`,
           });
@@ -1200,7 +1200,7 @@ const addFavouriteGenre = async (req, res, next) => {
           const genreUpdated = await Genre.findById(idGenre);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('favGenres'),
             genreUpdated,
             update: `pushed ${genreUpdated.type} to User's likes`,
           });
@@ -1245,7 +1245,7 @@ const followUser = async (req, res, next) => {
           const userFollowed = await User.findById(idUser);
 
           return res.status(200).json({
-            userUpdated: await User.findById(_id),
+            userUpdated: await User.findById(_id).populate('followers'),
             userFollowed,
             update: `pulled ${userFollowed.userName} from User's following`,
           });
