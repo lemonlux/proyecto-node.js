@@ -74,46 +74,50 @@ const createReview = async (req, res, next) => {
                     });
 
                     try {
-                      const bookUpdated = await Book.findById(idBook);
-                      const reviewCreated = await Review.findById(
-                        savedReview._id
-                      );
-                      const userUpdated = await User.findById(_id);
-
                       return res.status(200).json({
-                        bookUpdated,
-                        reviewCreated,
-                        userUpdated,
+                        reviewCreated: await Review.findById(
+                          savedReview._id
+                        ).populate('reviews'),
                       });
                     } catch (error) {
-                      return res.status(404).json({
-                        error: 'error returning response',
-                        message: error.message,
-                      });
+                      return (
+                        res.status(404).json({
+                          error: 'error returning response',
+                          message: error.message,
+                        }) && next(error)
+                      );
                     }
                   } catch (error) {
-                    return res.status(404).json({
-                      error: 'error saving user into review',
-                      message: error.message,
-                    });
+                    return (
+                      res.status(404).json({
+                        error: 'error saving user into review',
+                        message: error.message,
+                      }) && next(error)
+                    );
                   }
                 } catch (error) {
-                  return res.status(404).json({
-                    error: 'error saving  book into review',
-                    message: error.message,
-                  });
+                  return (
+                    res.status(404).json({
+                      error: 'error saving  book into review',
+                      message: error.message,
+                    }) && next(error)
+                  );
                 }
               } catch (error) {
-                return res.status(404).json({
-                  error: 'error savingreview into user',
-                  message: error.message,
-                });
+                return (
+                  res.status(404).json({
+                    error: 'error savingreview into user',
+                    message: error.message,
+                  }) && next(error)
+                );
               }
             } catch (error) {
-              return res.status(404).json({
-                error: 'error saving review into book',
-                message: error.message,
-              });
+              return (
+                res.status(404).json({
+                  error: 'error saving review into book',
+                  message: error.message,
+                }) && next(error)
+              );
             }
           } else {
             return res.status(404).json('this review already exists');
