@@ -320,10 +320,15 @@ const redirectRegister = async (req, res, next) => {
     const { userEmail, userName } = req.body;
     const userExist = await User.findOne(
       //buscamos el usuario
-      { userEmail },
-      { userName }
+      { userEmail }
     );
     if (!userExist) {
+
+          try {
+            const userNameExists = await User.findOne({ userName })
+
+            if(!userNameExists){
+        
       //si el usuario no existe hay que hacer uno nuevo
       const newUser = new User({ ...req.body, confirmationCode });
 
@@ -354,15 +359,29 @@ const redirectRegister = async (req, res, next) => {
           }) && next(error)
         );
       }
+
+    }else{
+      req.file && deleteImgCloudinary(catchImg);
+      return res.status(409).json('this username already exists');
+    }
+
+    } catch (error){
+      return res.status(404).json({
+        error: 'error en el trycatch buscando userName',
+        message: error.message
+      })
+    }
+
+
     } else {
       //si el user ya existe hay que borrar la imagen del cloudinary y decir q ya existe
       req.file && deleteImgCloudinary(catchImg);
-      return res.status(409).json('this user already exists');
+      return res.status(409).json('this email already exists');
     }
   } catch (error) {
     //da feedback al usuario y a nosotros
     req.file && deleteImgCloudinary(catchImg);
-    return next(setError(500, error.message || 'Error general to register'));
+    return next('soy el catch');
   }
 };
 
