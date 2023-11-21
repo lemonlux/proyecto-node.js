@@ -353,10 +353,7 @@ const redirectRegister = async (req, res, next) => {
       } catch (error) {
         req.file && deleteImgCloudinary(catchImg);
         return (
-          res.status(404).json({
-            error: 'error en el catch del save',
-            message: error.message,
-          }) && next(error)
+          res.status(404).json(error.message) && next(error)
         );
       }
 
